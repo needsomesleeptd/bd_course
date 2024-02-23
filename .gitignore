@@ -19,3 +19,33 @@
 
 # Go workspace file
 go.work
+
+# pdf files
+*.aux
+*.log
+*.bcf
+*.out
+*.run.xml
+*.gz
+*.synctexgz
+*.toc
+*.bbl
+*.blg
+
+*.aux
+*.log
+*.bcf
+*.out
+*.run.xml
+*.gz
+*.synctexgz
+*.toc
+*.fls
+*latexmk
+*svg-inkscape*
+*.log
+*.xml
+*.out
+*.aux
+*Zone.Identifier
+.idea
