@@ -54,6 +54,102 @@
 	\item достижение --- сущность награды для выдачи студентам, преуспевающим в выполнении лабораторных работ (хранит идентификатор студента, которому выдали награду, а также идентификатор отчета, за который было получено достижение).
 \end{enumerate}
 
+\section{Ограничения целостности базы данных}
+\begin{table}[htbp]
+	\centering
+	\begin{tabularx}{\textwidth}{|X|X|X|}
+		\hline
+		Поле & Тип & Ограничение \\
+		\hline
+		id & целое число & первичный ключ \\
+		\hline
+		page\_count & целое число & не пустое значение\\
+		\hline
+		document\_name & строка & не пустое значение\\
+		\hline
+		checks\_count & целое число & не пустое значение\\
+		\hline
+		creator\_id & целое число & не пустое значение\\
+		\hline
+		creation\_time & дата и время & не пустое значение\\
+		\hline
+	\end{tabularx}
+	\caption{Ограничение целостности сущности отчета}
+	\label{t:documents_cons}
+\end{table}
+
+\begin{table}[htbp]
+	\centering
+	\begin{tabularx}{\textwidth}{|X|X|X|}
+		\hline
+		Поле & Тип & Ограничение \\
+		\hline
+	  	id & целое число & первичный ключ \\
+	  	\hline
+		description & строка & не пустое значение \\
+		\hline
+		creator\_id & целое число & не пустое значение\\
+		\hline
+		class\_name & строка & не пустое значение\\
+		\hline
+	\end{tabularx}
+	\caption{Ограничение целостности сущности типа фрагмента}
+	\label{t:markup_type_cons}
+\end{table}
+
+\begin{table}[htbp]
+	 \centering
+	\begin{tabularx}{\textwidth}{|X|X|X|}
+		\hline
+		Поле & Тип & Ограничение \\
+		\hline
+		id & целое число & первичный ключ \\
+		\hline
+		page\_data & байты изображения & не пустое значение\\
+		\hline
+		error\_bb & массив из 4 вещественных чисел & не пустое значение\\
+		\hline
+		class\_label & целое число & не пустое значение\\
+		\hline
+		creator\_id & целое число & не пустое значение\\
+		\hline
+	\end{tabularx}
+	\caption{Ограничение целостности сущности типа фрагмента}
+	\label{tab:markups}
+\end{table}
+
+
+
+\begin{table}[htbp]
+	\centering
+	\begin{tabularx}{\textwidth}{|X|X|X|}
+	\hline
+	Поле & Тип & Ограничение \\
+	\hline
+	id & целое число & первичный ключ\\
+	\hline
+	login & строка & уникальный,не пустое значение\\
+	\hline
+	password & строка & не пустое значение\\
+	\hline
+	name & строка & не пустое значение\\
+	\hline
+	surname & строка & не пустое значение\\
+	\hline
+	role\_id & целое число & не пустое значение\\
+	\hline
+	role\_type & строка & не пустое значение\\
+	\hline
+	group & строка & не пустое значение\\
+	\hline
+	\end{tabularx}
+	\caption{Ограничение целостности сущности пользователя}
+	\label{t:users_cons}
+\end{table}
+
+
+
+
 Для описания сценариев взаимодействия пользователей с системой была создана диаграмма прецедентов, представленная на рисунке~\ref{img:BD_use_cases}.
 
 \includeimage
