@@ -88,11 +88,11 @@ func main() {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
-	err = migrate(db)
+	/*err = migrate(db)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
-	}
+	}*/
 
 	//auth service
 	userRepo := user_repo_adapter.NewUserRepositoryAdapter(db)
@@ -148,6 +148,7 @@ func main() {
 			r.Get("/getDocument", documentHandler.GetDocumentByID())
 			r.Get("/getReport", documentHandler.GetReportByID())
 			r.Get("/getDocumentsMeta", documentHandler.GetDocumentsMetaData())
+			//r.Post("/loadMeta")
 		})
 
 		// AnnotType

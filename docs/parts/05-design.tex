@@ -55,8 +55,10 @@
 \end{enumerate}
 
 \section{Ограничения целостности базы данных}
+В данной части работы будут описаны описаны поля сущностей баз данных и их ограничения, для обеспечения целостности данных системы. Ограничение <<первичный ключ>> подразумевает то что поле сущности является первичным ключом данного отношения в реляционной модели данных.
 \begin{table}[htbp]
 	\centering
+	\caption{Ограничение целостности сущности отчета}
 	\begin{tabularx}{\textwidth}{|X|X|X|}
 		\hline
 		Поле & Тип & Ограничение \\
@@ -74,12 +76,13 @@
 		creation\_time & дата и время & не пустое значение\\
 		\hline
 	\end{tabularx}
-	\caption{Ограничение целостности сущности отчета}
+
 	\label{t:documents_cons}
 \end{table}
 
 \begin{table}[htbp]
 	\centering
+	\caption{Ограничение целостности сущности типа фрагмента}
 	\begin{tabularx}{\textwidth}{|X|X|X|}
 		\hline
 		Поле & Тип & Ограничение \\
@@ -93,12 +96,13 @@
 		class\_name & строка & не пустое значение\\
 		\hline
 	\end{tabularx}
-	\caption{Ограничение целостности сущности типа фрагмента}
+	
 	\label{t:markup_type_cons}
 \end{table}
 
 \begin{table}[htbp]
 	 \centering
+	 \caption{Ограничение целостности сущности типа фрагмента}
 	\begin{tabularx}{\textwidth}{|X|X|X|}
 		\hline
 		Поле & Тип & Ограничение \\
@@ -114,14 +118,14 @@
 		creator\_id & целое число & не пустое значение\\
 		\hline
 	\end{tabularx}
-	\caption{Ограничение целостности сущности типа фрагмента}
-	\label{tab:markups}
+	\label{t:markups}
 \end{table}
 
 
 
 \begin{table}[htbp]
 	\centering
+	\caption{Ограничение целостности сущности пользователя}
 	\begin{tabularx}{\textwidth}{|X|X|X|}
 	\hline
 	Поле & Тип & Ограничение \\
@@ -143,10 +147,67 @@
 	group & строка & не пустое значение\\
 	\hline
 	\end{tabularx}
-	\caption{Ограничение целостности сущности пользователя}
 	\label{t:users_cons}
 \end{table}
 
+
+\begin{table}[htbp]
+	\centering
+	\caption{Ограничение целостности сущности достижения}
+	\begin{tabularx}{\textwidth}{|X|X|X|}
+		\hline
+		Поле & Тип & Ограничение \\
+		\hline
+		id & целое число & первичный ключ\\
+		\hline
+		picture & байты изображения &  не пустое значение\\
+		\hline
+		text & строка & не пустое значение\\
+		\hline
+		creator\_id & целое число & не пустое значение\\
+		\hline
+	\end{tabularx}
+	\label{t:achievment_cons}
+\end{table}
+
+
+\begin{table}[htbp]
+	\centering
+	\caption{Ограничение целостности сущности достижения}
+	\begin{tabularx}{\textwidth}{|X|X|X|}
+		\hline
+		Поле & Тип & Ограничение \\
+		\hline
+		id & целое число & первичный ключ\\
+		\hline
+		picture & байты изображения &  не пустое значение\\
+		\hline
+		description & строка & не пустое значение\\
+		\hline
+		creator\_id & целое число & не пустое значение\\
+		\hline
+	\end{tabularx}
+	\label{t:achievment_cons}
+\end{table}
+
+\begin{table}[htbp]
+	\centering
+	\caption{Ограничение целостности сущности комментария}
+	\begin{tabularx}{\textwidth}{|X|X|X|}
+		\hline
+		Поле & Тип & Ограничение \\
+		\hline
+		id & целое число & первичный ключ\\
+		\hline
+		description & строка & не пустое значение\\
+		\hline
+		creator\_id & целое число & не пустое значение\\
+		\hline
+		report\_id & целое число & не пустое значение\\
+		\hline
+	\end{tabularx}
+	\label{t:comment_cons}
+\end{table}
 
 
 

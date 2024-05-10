@@ -49,3 +49,4 @@ go.work
 *.aux
 *Zone.Identifier
 .idea
+__pycache__

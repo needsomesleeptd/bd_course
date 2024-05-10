@@ -4,10 +4,9 @@ ALTER TABLE markups ADD CONSTRAINT fk_markup_markup_type FOREIGN KEY ( class_lab
 
 ALTER TABLE documents ADD CONSTRAINT fk_document_user FOREIGN KEY ( creator_id ) REFERENCES users( id );
 
-ALTER TABLE documents ADD CONSTRAINT fk_document_user FOREIGN KEY ( creator_id ) REFERENCES users( id );
-
 ALTER TABLE markups ADD CONSTRAINT fk_markup_user FOREIGN KEY ( creator_id ) REFERENCES users( id );
 
 ALTER TABLE markup_types ADD CONSTRAINT fk_markup_types_user FOREIGN KEY ( creator_id ) REFERENCES users( id );
 
 
+ALTER TABLE document_queues ADD CONSTRAINT fk_doc_queue_docs FOREIGN KEY ( doc_id ) REFERENCES documents( id );

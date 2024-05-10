@@ -236,3 +236,55 @@ func (h *Documenthandler) CreateReport() http.HandlerFunc {
 
 	}
 }
+
+func (h *Documenthandler) SaveDocument() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID := r.Context().Value(auth_middleware.UserIDContextKey).(uint64)
+
+		err := r.ParseMultipartForm(32 << 20)
+		if err != nil {
+			render.JSON(w, r, response.Error(ErrGettingFile.Error()))
+			h.logger.Error(err.Error())
+			return
+		}
+		file, handler, err := r.FormFile(FILE_HEADER_KEY)
+		if err != nil {
+			render.JSON(w, r, response.Error(ErrGettingFile.Error()))
+			h.logger.Error(err.Error())
+		}
+
+		var fileBytes []byte
+		fileBytes, err = ExtractfileBytesHelper(file)
+
+		if err != nil {
+			render.JSON(w, r, response.Error(err.Error()))
+			h.logger.Error(err.Error())
+			return
+		}
+
+		var pagesCount int
+		pagesCount, err = pdf_utils.GetPdfPageCount(fileBytes)
+
+		if err != nil {
+			h.logger.Error(errors.Join(err, ErrGettingPageCount).Error())
+			pagesCount = -1
+		}
+
+		documentMetaData := models.DocumentMetaData{
+			ID:           uuid.New(),
+			CreatorID:    userID,
+			DocumentName: handler.Filename,
+			CreationTime: time.Now(),
+			PageCount:    pagesCount,
+		}
+
+		err = h.docService.SaveMetaData(documentMetaData)
+		if err != nil {
+			render.JSON(w, r, response.Error(models.GetUserError(err).Error()))
+			h.logger.Error(err.Error())
+			return
+		}
+		resp := response.OK()
+		render.JSON(w, r, resp)
+	}
+}

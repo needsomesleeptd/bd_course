@@ -36,6 +36,8 @@ type IDocumentService interface {
 	LoadDocument(documentMetaData models.DocumentMetaData, document models.DocumentData) (*models.ErrorReport, error)
 	GetDocumentByID(ID uuid.UUID) (*models.DocumentData, error)
 	GetReportByID(ID uuid.UUID) (*models.ErrorReport, error)
+	CreateReport(ID uuid.UUID) (*models.ErrorReport, error)
+	SaveMetaData(documentMetaData models.DocumentMetaData) error
 }
 
 type DocumentService struct {
@@ -81,6 +83,35 @@ func (serv *DocumentService) LoadDocument(documentMetaData models.DocumentMetaDa
 		return nil, errors.Wrap(err, DOCUMENT_META_SAVE_ERR_STR)
 	}
 	return errReport, nil
+}
+
+func (serv *DocumentService) CreateReport(ID uuid.UUID) (*models.ErrorReport, error) {
+	var errReport *models.ErrorReport
+	document, err := serv.docRepo.GetDocumentByID(ID)
+	if err != nil {
+		return nil, errors.Wrap(err, REPORT_ERR_STR)
+	}
+
+	errReport, err = serv.reportService.CreateReport(*document)
+
+	if err != nil {
+		return nil, errors.Wrap(err, REPORT_ERR_STR)
+	}
+
+	err = serv.reportRepo.AddReport(errReport)
+	if err != nil {
+		return nil, errors.Wrap(err, DOCUMENT_META_SAVE_ERR_STR)
+	}
+	return errReport, nil
+}
+
+func (serv *DocumentService) SaveMetaData(documentMetaData models.DocumentMetaData) error {
+
+	err := serv.docMetaRepo.AddDocument(&documentMetaData)
+	if err != nil {
+		return errors.Wrap(err, DOCUMENT_META_SAVE_ERR_STR)
+	}
+	return nil
 }
 
 func (serv *DocumentService) GetDocumentsByCreatorID(creatorID uint64) ([]models.DocumentMetaData, error) {
