@@ -39,3 +39,35 @@ CREATE TABLE IF NOT EXISTS document_queues (
     status SMALLINT NOT NULL,
     CONSTRAINT fk_doc_queue_docs FOREIGN KEY (doc_id) REFERENCES documents(id) ON DELETE CASCADE
 );
+
+
+CREATE TABLE IF NOT EXISTS document_queues (
+    id serial PRIMARY KEY NOT NULL,
+    doc_id UUID NOT NULL,
+    status SMALLINT NOT NULL,
+    CONSTRAINT fk_doc_queue_docs FOREIGN KEY (doc_id) REFERENCES documents(id) ON DELETE CASCADE
+);
+
+
+
+
+CREATE TABLE IF NOT EXISTS comments (
+    id serial PRIMARY KEY NOT NULL,
+    doc_id UUID NOT NULL,
+    description text NOT NULL,
+    creator_id INT NOT NULL,
+    CONSTRAINT fk_comment_docs FOREIGN KEY (doc_id) REFERENCES documents(id) ON DELETE CASCADE,
+    CONSTRAINT fk_comment_users FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS achievments (
+    id serial PRIMARY KEY NOT NULL,
+    description text NOT NULL,
+    creator_id INT NOT NULL,
+    granted_to_id INT NOT NULL,
+    CONSTRAINT fk_comment_creator FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_comment_granted FOREIGN KEY (granted_to_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+
+
