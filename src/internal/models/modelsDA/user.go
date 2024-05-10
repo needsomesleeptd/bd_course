@@ -9,7 +9,7 @@ type User struct {
 	Name     string      `gorm:"column:name"`
 	Surname  string      `gorm:"column:surname"`
 	Role     models.Role `gorm:"embedded;column:role"`
-	Group    string      `gorm:"embedded;column:group"` // in case it is a controller it will have work group, in case of user, his group
+	Group    string      `gorm:"embedded;column:user_group"` // in case it is a controller it will have work group, in case of user, his group
 }
 
 func FromDaUser(userDa *User) models.User {

@@ -10,8 +10,9 @@ BEGIN
         FROM
             document_queues
         WHERE
-            doc_id = NEW.ID AND status = 2
-    ) THEN
+            doc_id = NEW.ID AND status = 2 
+    ) AND NEW.document_name NOT LIKE '%VIP%' 
+    THEN
         INSERT INTO 
         document_queues(doc_id,status)
         VALUES

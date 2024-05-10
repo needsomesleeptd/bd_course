@@ -20,8 +20,7 @@ CREATE TABLE IF NOT EXISTS users (
    password VARCHAR(255) NOT NULL,
    name VARCHAR(255),
    surname VARCHAR(255) NOT NULL,
-   role_id BIGINT,
-   role_type VARCHAR(255) NOT NULL,
+   role INT NOT NULL,
    user_group VARCHAR(255) NOT NULL 
 );
 
