@@ -74,7 +74,7 @@ TO student;
 GRANT INSERT,SELECT
 ON public.markups 
 TO student;
--- think about adding function for viewing all his documents and reports
+
 
 
 --Создание нормоконтроллера
@@ -82,7 +82,7 @@ CREATE ROLE controller WITH
 NOSUPERUSER
 NOCREATEDB
 NOCREATEROLE
-NOINHERIT
+INHERIT
 NOREPLICATION
 NOBYPASSRLS
 CONNECTION LIMIT -1
@@ -90,16 +90,11 @@ CONNECTION LIMIT -1
  PASSWORD 'controller';
 
 
-
-
 GRANT  ALL PRIVILEGES
 ON public.comments 
 TO controller;
 
-GRANT SELECT
-ON public.markups 
-TO controller;
-
+GRANT annoter TO controller;
 
 GRANT INSERT,SELECT
 ON public.markup_types 
@@ -108,3 +103,19 @@ TO controller;
 GRANT ALL PRIVILEGES
 ON public.achievment 
 TO controller;
+
+--Рабоник очереди
+CREATE ROLE queue_worker WITH
+NOSUPERUSER
+NOCREATEDB
+NOCREATEROLE
+NOINHERIT
+NOREPLICATION
+NOBYPASSRLS
+CONNECTION LIMIT -1
+ LOGIN
+ PASSWORD 'queue_worker';
+
+GRANT SELECT,UPDATE
+ON public.document_queues
+TO queue_worker;
