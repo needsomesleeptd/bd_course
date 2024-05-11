@@ -14,6 +14,7 @@ type Document struct {
 	ChecksCount  int       `gorm:"column:checks_count"`
 	CreatorID    uint64    `gorm:"column:creator_id;"`
 	CreationTime time.Time `gorm:"column:creation_time"`
+	HasPassed    bool      `gorm:"column:has_passed"`
 }
 
 func FromDaDocument(documentDa *Document) models.DocumentMetaData {
@@ -23,6 +24,7 @@ func FromDaDocument(documentDa *Document) models.DocumentMetaData {
 		DocumentName: documentDa.DocumentName,
 		CreatorID:    documentDa.CreatorID,
 		CreationTime: documentDa.CreationTime,
+		HasPassed:    documentDa.HasPassed,
 	}
 
 }
@@ -49,5 +51,6 @@ func ToDaDocument(document models.DocumentMetaData) *Document {
 		DocumentName: document.DocumentName,
 		CreatorID:    document.CreatorID,
 		CreationTime: document.CreationTime,
+		HasPassed:    document.HasPassed,
 	}
 }

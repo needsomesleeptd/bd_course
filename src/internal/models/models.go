@@ -12,6 +12,7 @@ type DocumentMetaData struct {
 	DocumentName string
 	CreatorID    uint64
 	CreationTime time.Time
+	HasPassed    bool
 }
 
 type DocumentData struct {
@@ -28,6 +29,7 @@ type Markup struct {
 	TypeLabel  int
 	WasChecked bool
 	DocumentID uuid.UUID
+	IsValid    bool
 }
 
 type Role int

@@ -38,6 +38,7 @@ type IDocumentService interface {
 	GetReportByID(ID uuid.UUID) (*models.ErrorReport, error)
 	CreateReport(ID uuid.UUID) (*models.ErrorReport, error)
 	SaveMetaData(documentMetaData models.DocumentMetaData) error
+	UpdateDocumentData(id uuid.UUID, data models.DocumentMetaData) error
 }
 
 type DocumentService struct {
@@ -156,4 +157,12 @@ func (serv *DocumentService) GetDocumentCountByCreatorID(creatorID uint64) (int6
 		return -1, err
 	}
 	return count, err
+}
+
+func (serv *DocumentService) UpdateDocumentData(id uuid.UUID, data models.DocumentMetaData) error {
+	err := serv.docMetaRepo.UpdateData(id, data)
+	if err != nil {
+		return errors.Wrap(err, "Error updating document data")
+	}
+	return errors.Wrap(err, "Error updating document data")
 }

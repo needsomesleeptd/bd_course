@@ -148,7 +148,7 @@ func main() {
 			r.Get("/getDocument", documentHandler.GetDocumentByID())
 			r.Get("/getReport", documentHandler.GetReportByID())
 			r.Get("/getDocumentsMeta", documentHandler.GetDocumentsMetaData())
-			//r.Post("/loadMeta")
+			r.Post("/makeDecision", documentHandler.MakeDecisionPassed())
 		})
 
 		// AnnotType
@@ -182,6 +182,7 @@ func main() {
 			r.Delete("/delete", annot_handler.DeleteAnnot(annotService))
 			r.Get("/getsAll", annot_handler.GetAllAnnots(annotService))
 			r.Post("/check", annot_handler.Check(annotService))
+			r.Post("/validate")
 		})
 		//user
 		r.Route("/user", func(r chi.Router) {

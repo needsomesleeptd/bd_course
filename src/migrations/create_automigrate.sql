@@ -4,7 +4,8 @@ CREATE TABLE IF NOT EXISTS documents (
     document_name VARCHAR(255) NOT NULL,
     checks_count INT NOT NULL,
     creator_id BIGINT NOT NULL,
-    creation_time TIMESTAMP NOT NULL
+    creation_time TIMESTAMP NOT NULL,
+    has_passed BOOL NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS markup_types (
@@ -32,7 +33,8 @@ CREATE TABLE IF NOT EXISTS markups (
     creator_id BIGINT NOT NULL,
     type_label INT NOT NULL,
     was_checked BOOL NOT NULL,
-    document_id UUID
+    document_id UUID NOT NULL,
+    is_valid BOOL NOT NULL
 );
 
 
@@ -74,6 +76,6 @@ ALTER TABLE markups ADD CONSTRAINT fk_markup_user FOREIGN KEY ( creator_id ) REF
 
 ALTER TABLE markup_types ADD CONSTRAINT fk_markup_types_user FOREIGN KEY ( creator_id ) REFERENCES users( id );
 
-ALTER TABLE document_queues ADD CONSTRAINT fk_doc_queue_docs FOREIGN KEY ( doc_id ) REFERENCES documents( id );
+ALTER TABLE document_queues ADD CONSTRAINT fk_doc_queue_docs FOREIGN KEY ( doc_id ) REFERENCES documents( id ) ON DELETE CASCADE;
 
 

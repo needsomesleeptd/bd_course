@@ -69,3 +69,16 @@ func (repo *DocumentMetaDataRepositoryAdapter) GetDocumentCountByCreator(id uint
 	}
 	return count, nil
 }
+
+func (repo *DocumentMetaDataRepositoryAdapter) UpdateData(id uuid.UUID, data models.DocumentMetaData) error {
+	dataDA := models_da.ToDaDocument(data)
+	tx := repo.db.Model(models_da.Document{}).Where("id = ?", id).Updates(dataDA)
+
+	if tx.Error == gorm.ErrRecordNotFound {
+		return models.ErrNotFound
+	}
+	if tx.Error != nil {
+		return errors.Wrap(tx.Error, "Error in getting count by creator")
+	}
+	return nil
+}

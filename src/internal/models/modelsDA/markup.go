@@ -24,6 +24,7 @@ type Markup struct {
 	TypeLabel  int          `gorm:"not null;column:type_label"`
 	WasChecked bool         `gorm:"not null;column:was_checked"`
 	DocumentID uuid.UUID    `gorm:"column:document_id"`
+	IsValid    bool         `gorm:"column:is_valid"`
 }
 
 func FromDaMarkup(markupDa *Markup) (models.Markup, error) {
@@ -33,6 +34,7 @@ func FromDaMarkup(markupDa *Markup) (models.Markup, error) {
 		ClassLabel: markupDa.ClassLabel,
 		CreatorID:  markupDa.CreatorID,
 		DocumentID: markupDa.DocumentID,
+		IsValid:    markupDa.IsValid,
 	}
 	var errorBBsJson []float32
 	err := json.Unmarshal(markupDa.ErrorBB.Bytes, &errorBBsJson)
@@ -54,6 +56,7 @@ func ToDaMarkup(markup models.Markup) (*Markup, error) {
 		DocumentID: markup.DocumentID,
 		TypeLabel:  markup.TypeLabel,
 		WasChecked: markup.WasChecked,
+		IsValid:    markup.IsValid,
 	}
 	jsonB, err := json.Marshal(markup.ErrorBB)
 	if err != nil {

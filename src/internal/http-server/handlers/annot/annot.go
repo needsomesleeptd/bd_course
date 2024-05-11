@@ -43,6 +43,7 @@ type RequestUpdate struct {
 	ErrorBB    []float32 `json:"error_bb"`
 	ClassLabel uint64    `json:"class_label"`
 	TypeLabel  int       `json:"type_label"`
+	IsValid    bool      `json:"is_valid"`
 }
 
 type ResponseGetAnnot struct {
@@ -179,6 +180,7 @@ func Check(annotService service.IAnotattionService) http.HandlerFunc {
 			TypeLabel:  req.TypeLabel,
 			ErrorBB:    req.ErrorBB,
 			CreatorID:  userID,
+			IsValid:    req.IsValid,
 		}
 		err = annotService.CheckAnotattion(&markup)
 		if err != nil {

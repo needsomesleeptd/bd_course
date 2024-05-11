@@ -14,6 +14,7 @@ type Document struct {
 	ChecksCount  int       `json:"checks_count"`
 	CreatorID    uint64    `json:"creator_id"`
 	CreationTime time.Time `json:"creation_time"`
+	HasPassed    bool      `json:"has_passed"`
 }
 
 func FromDtoDocument(document *Document) models.DocumentMetaData {
@@ -24,6 +25,7 @@ func FromDtoDocument(document *Document) models.DocumentMetaData {
 		DocumentName: document.DocumentName,
 		CreatorID:    document.CreatorID,
 		CreationTime: document.CreationTime,
+		HasPassed:    document.HasPassed,
 	}
 	return doc
 
@@ -36,6 +38,7 @@ func ToDtoDocument(document models.DocumentMetaData) Document {
 		DocumentName: document.DocumentName,
 		CreatorID:    document.CreatorID,
 		CreationTime: document.CreationTime,
+		HasPassed:    document.HasPassed,
 	}
 	return dtoDoc
 }

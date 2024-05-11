@@ -36,7 +36,7 @@ def get_anotattions(png_page,byte_page, model):
     annots = []
     for predict in predicts:
         print(predict.boxes.xyxy.tolist(),predict.boxes.cls.tolist())
-        bboxes = predict.boxes.xyxy.tolist()
+        bboxes = predict.boxes.xyxyn.tolist()
         clses = predict.boxes.cls.tolist()
         if (len(bboxes) !=0):
             for i in range(len(bboxes)):

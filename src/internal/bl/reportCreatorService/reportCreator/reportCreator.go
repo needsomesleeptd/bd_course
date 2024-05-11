@@ -57,7 +57,11 @@ func (cr *PDFReportCreator) saveImagesWithBBs(filePathSave string, markups []mod
 		boundingBoxImg := image.NewRGBA(img.Bounds())
 		draw.Draw(boundingBoxImg, img.Bounds(), img, image.Point{}, draw.Src)
 		boundingBoxColor := color.RGBA{255, 0, 0, 255}
-		x1, y1, x2, y2 := int(markup.ErrorBB[0]), int(markup.ErrorBB[1]), int(markup.ErrorBB[2]), int(markup.ErrorBB[3])
+
+		imgWidth := float32(img.Bounds().Dx())
+		imgHeight := float32(img.Bounds().Dy())
+
+		x1, y1, x2, y2 := int(markup.ErrorBB[0]*imgWidth), int(markup.ErrorBB[1]*imgHeight), int(markup.ErrorBB[2]*imgWidth), int(markup.ErrorBB[3]*imgHeight)
 		boundingBoxes := []bboxes_utils.BoundingBox{
 			{
 				XMin: x1,
@@ -66,6 +70,7 @@ func (cr *PDFReportCreator) saveImagesWithBBs(filePathSave string, markups []mod
 				YMax: y2,
 			},
 		}
+
 		bboxes_utils.DrawBoundingBoxes(boundingBoxImg, boundingBoxes, boundingBoxColor)
 
 		imgFilePath := filePathSave + strconv.Itoa(i) + fileFormat

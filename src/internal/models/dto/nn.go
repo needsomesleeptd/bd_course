@@ -12,6 +12,7 @@ type Markup struct {
 	CreatorID  uint64    `json:"creator_id"`
 	TypeLabel  int       `json:"type_label"`
 	WasChecked bool      `json:"was_checked"`
+	IsValid    bool      `json::"column:is_valid"`
 }
 
 func FromDtoMarkup(markup *Markup) models.Markup {
@@ -24,6 +25,7 @@ func FromDtoMarkup(markup *Markup) models.Markup {
 		CreatorID:  markup.CreatorID,
 		TypeLabel:  markup.TypeLabel,
 		WasChecked: markup.WasChecked,
+		IsValid:    markup.IsValid,
 	}
 
 }
@@ -37,6 +39,7 @@ func ToDtoMarkup(markup models.Markup) *Markup {
 		CreatorID:  markup.CreatorID,
 		TypeLabel:  markup.TypeLabel,
 		WasChecked: markup.WasChecked,
+		IsValid:    markup.IsValid,
 	}
 }
 

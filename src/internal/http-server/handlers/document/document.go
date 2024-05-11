@@ -55,6 +55,11 @@ type RequestCheckDocument struct {
 	Document []byte `json:"document_data"`
 }
 
+type RequestPassed struct {
+	ID        uuid.UUID `json:"ID"`
+	HasPassed bool      `json:"has_passed"`
+}
+
 type RequestID struct {
 	ID uuid.UUID `json:"ID"`
 }
@@ -173,6 +178,90 @@ func (h *Documenthandler) GetDocumentsMetaData() http.HandlerFunc {
 }
 
 func (h *Documenthandler) CreateReport() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID := r.Context().Value(auth_middleware.UserIDContextKey).(uint64)
+
+		err := r.ParseMultipartForm(32 << 20)
+		if err != nil {
+			render.JSON(w, r, response.Error(ErrGettingFile.Error()))
+			h.logger.Error(err.Error())
+			return
+		}
+		file, handler, err := r.FormFile(FILE_HEADER_KEY)
+		if err != nil {
+			render.JSON(w, r, response.Error(ErrGettingFile.Error()))
+			h.logger.Error(err.Error())
+		}
+
+		var fileBytes []byte
+		fileBytes, err = ExtractfileBytesHelper(file)
+
+		if err != nil {
+			render.JSON(w, r, response.Error(err.Error()))
+			h.logger.Error(err.Error())
+			return
+		}
+
+		var pagesCount int
+		pagesCount, err = pdf_utils.GetPdfPageCount(fileBytes)
+
+		if err != nil {
+			h.logger.Error(errors.Join(err, ErrGettingPageCount).Error())
+			pagesCount = -1
+		}
+
+		documentMetaData := models.DocumentMetaData{
+			ID:           uuid.New(),
+			CreatorID:    userID,
+			DocumentName: handler.Filename,
+			CreationTime: time.Now(),
+			PageCount:    pagesCount,
+		}
+		documentData := models.DocumentData{
+			DocumentBytes: fileBytes,
+			ID:            documentMetaData.ID,
+		}
+
+		var report *models.ErrorReport
+		report, err = h.docService.LoadDocument(documentMetaData, documentData, userID)
+		if err != nil {
+			render.JSON(w, r, response.Error(models.GetUserError(err).Error()))
+			h.logger.Error(err.Error())
+			return
+		}
+
+		w.Header().Set("Content-Type", http.DetectContentType(report.ReportData))
+		w.Header().Set("Content-Length", fmt.Sprintf("%v", len(report.ReportData)))
+		_, err = w.Write(report.ReportData)
+		if err != nil {
+			render.JSON(w, r, response.Error(ErrCreatingReport.Error()))
+			h.logger.Error(err.Error())
+			return
+		}
+
+	}
+}
+
+func (h *Documenthandler) MakeDecisionPassed() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req RequestPassed
+
+		err := render.DecodeJSON(r.Body, &req)
+		if err != nil {
+			render.JSON(w, r, response.Error(models.ErrDecodingRequest.Error())) //TODO:: add logging here
+			return
+		}
+		document := models.DocumentMetaData{HasPassed: req.HasPassed}
+		err = h.docService.UpdateDocumentData(req.ID, document)
+		if err != nil {
+			render.JSON(w, r, response.Error(models.GetUserError(err).Error()))
+			return
+		}
+		render.JSON(w, r, response.OK())
+	}
+}
+
+func (h *Documenthandler) MakeVerdict() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := r.Context().Value(auth_middleware.UserIDContextKey).(uint64)
 
