@@ -39,6 +39,15 @@
 {H} % Положение рисунка (см. figure из пакета float)
 {1\textwidth} % Ширина рисунка
 {IDEF0 проверки составных частей отчета на соответствие ГОСТ 7.32 1 уровня} % Подпись рисунка
+\newpage
+\section{Формализация работы системы проверки отчета}
+На рисунке~\ref{img:main_sys_bpmn}, представлена схема BPMN 2.0 работы системы в процессе проверки отчета, а также всех взаимодействующих с ней акторов.
+\begin{sidewaysfigure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{./inc/img/process_check_bpmn.pdf}
+	\caption{Схема BPMN 2.0 работы системы}
+	\label{img:main_sys_bpmn}
+\end{sidewaysfigure}
 
 
 \section{Формализация сущностей базы данных}
@@ -56,7 +65,7 @@
 
 \section{Ограничения целостности базы данных}
 В данной части работы будут описаны описаны поля сущностей баз данных и их ограничения, для обеспечения целостности данных системы. Ограничение <<первичный ключ>> подразумевает то что поле сущности является первичным ключом данного отношения в реляционной модели данных.
-\begin{table}[htbp]
+\begin{table}[h!tbp]
 	\centering
 	\caption{Ограничение целостности сущности отчета}
 	\begin{tabularx}{\textwidth}{|X|X|X|}
@@ -80,7 +89,7 @@
 	\label{t:documents_cons}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[h!tbp]
 	\centering
 	\caption{Ограничение целостности сущности фрагмента}
 	\begin{tabularx}{\textwidth}{|X|X|X|}
@@ -100,7 +109,7 @@
 	\label{t:markup_type_cons}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[H]
 	 \centering
 	 \caption{Ограничение целостности сущности типа фрагмента}
 	\begin{tabularx}{\textwidth}{|X|X|X|}
@@ -123,7 +132,8 @@
 
 
 
-\begin{table}[htbp]
+
+\begin{table}[h!tbp]
 	\centering
 	\caption{Ограничение целостности сущности пользователя}
 	\begin{tabularx}{\textwidth}{|X|X|X|}
@@ -151,7 +161,7 @@
 \end{table}
 
 
-\begin{table}[htbp]
+\begin{table}[h!tbp]
 	\centering
 	\caption{Ограничение целостности сущности достижения}
 	\begin{tabularx}{\textwidth}{|X|X|X|}
@@ -172,7 +182,7 @@
 	\label{t:achievment_cons}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[h!tbp]
 	\centering
 	\caption{Ограничение целостности сущности комментария}
 	\begin{tabularx}{\textwidth}{|X|X|X|}
@@ -193,14 +203,7 @@
 
 
 
-Для описания сценариев взаимодействия пользователей с системой была создана диаграмма прецедентов, представленная на рисунке~\ref{img:BD_use_cases}.
 
-\includeimage
-{BD_use_cases} % Имя файла без расширения (файл должен быть расположен в директории inc/img/)
-{f} % Обтекание (без обтекания)
-{H} % Положение рисунка (см. figure из пакета float)
-{1\textwidth} % Ширина рисунка
-{Диаграмма прецедентов} % Подпись рисунка
 
 
 \section{Ролевая модель}

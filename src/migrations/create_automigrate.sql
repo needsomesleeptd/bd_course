@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS markup_types (
     id serial  PRIMARY KEY,
     description VARCHAR(255) NOT NULL,
     creator_id INT NOT NULL,
-    class_name VARCHAR(255) NOT NULL
+    class_name VARCHAR(255) NOT NULL,
 );
 
 CREATE TABLE IF NOT EXISTS users (
@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS markups (
     error_bb JSONB DEFAULT '[]' NOT NULL,
     class_label BIGINT NOT NULL,
     creator_id BIGINT NOT NULL
+    type_label INT NOT NULL 
 );
 
 

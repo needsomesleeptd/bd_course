@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS document_queues (
     CONSTRAINT fk_doc_queue_docs FOREIGN KEY (doc_id) REFERENCES documents(id) ON DELETE CASCADE
 );
 
-
+    
 CREATE TABLE IF NOT EXISTS comments (
     id serial PRIMARY KEY NOT NULL,
     doc_id UUID NOT NULL,
