@@ -8,4 +8,5 @@ type IAnotattionRepository interface {
 	GetAnottationByID(id uint64) (*models.Markup, error)
 	GetAnottationsByUserID(id uint64) ([]models.Markup, error)
 	GetAllAnottations() ([]models.Markup, error)
+	UpdateAnotattion(id uint64, markUp *models.Markup) error
 }

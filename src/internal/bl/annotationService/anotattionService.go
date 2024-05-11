@@ -27,6 +27,7 @@ type IAnotattionService interface {
 	GetAnottationByID(id uint64) (*models.Markup, error)
 	GetAnottationByUserID(user_id uint64) ([]models.Markup, error)
 	GetAllAnottations() ([]models.Markup, error)
+	CheckAnotattion(markup *models.Markup) error
 }
 
 type AnotattionService struct {
@@ -105,4 +106,13 @@ func (serv *AnotattionService) GetAllAnottations() ([]models.Markup, error) {
 		return nil, errors.Wrap(err, GETTING_ANNOT_ERR_STR)
 	}
 	return markups, nil
+}
+
+func (serv *AnotattionService) CheckAnotattion(markup *models.Markup) error {
+	markup.WasChecked = true
+	err := serv.repo.UpdateAnotattion(markup.ID, markup)
+	if err != nil {
+		return errors.Wrap(err, "error checking anotattion")
+	}
+	return nil
 }

@@ -25,6 +25,9 @@ type Markup struct {
 	ErrorBB    []float32 //Bounding boxes in yolov8 format
 	ClassLabel uint64
 	CreatorID  uint64
+	TypeLabel  int
+	WasChecked bool
+	DocumentID uuid.UUID
 }
 
 type Role int

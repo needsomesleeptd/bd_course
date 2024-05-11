@@ -15,15 +15,18 @@ output_format = "png"
 	#ClassLabel uint64    `json:"class_label"`
 
 class Anotattion:
-    def __init__(self,page,bbs,cls) -> None:
+    def __init__(self,page,bbs,cls,err) -> None:
         self.page = page
         self.bbs = bbs
         self.cls = cls
+        self.err =err
     def to_json_dict(self):
         return {
             "page_data" : self.page,
             "error_bb" : self.bbs,
-            "class_label" : self.cls
+            "class_label" : self.cls,
+            "type_label" : self.err,
+            "was_checked" : False
         }
 
 
@@ -37,7 +40,7 @@ def get_anotattions(png_page,byte_page, model):
         clses = predict.boxes.cls.tolist()
         if (len(bboxes) !=0):
             for i in range(len(bboxes)):
-                annot = Anotattion(b64encode(byte_page).decode('utf-8'),bboxes[i],int(clses[i]))
+                annot = Anotattion(b64encode(byte_page).decode('utf-8'),bboxes[i],int(clses[i]),int(clses[i]))
                 annots.append(annot)
     return annots
     

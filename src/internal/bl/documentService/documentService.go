@@ -33,7 +33,7 @@ var (
 type IDocumentService interface {
 	GetDocumentsByCreatorID(creatorID uint64) ([]models.DocumentMetaData, error)
 	GetDocumentCountByCreatorID(creatorID uint64) (int64, error)
-	LoadDocument(documentMetaData models.DocumentMetaData, document models.DocumentData) (*models.ErrorReport, error)
+	LoadDocument(documentMetaData models.DocumentMetaData, document models.DocumentData, userID uint64) (*models.ErrorReport, error)
 	GetDocumentByID(ID uuid.UUID) (*models.DocumentData, error)
 	GetReportByID(ID uuid.UUID) (*models.ErrorReport, error)
 	CreateReport(ID uuid.UUID) (*models.ErrorReport, error)
@@ -56,7 +56,7 @@ func NewDocumentService(docMetaRepoSrc doc_repository.IDocumentMetaDataRepositor
 	}
 }
 
-func (serv *DocumentService) LoadDocument(documentMetaData models.DocumentMetaData, document models.DocumentData) (*models.ErrorReport, error) {
+func (serv *DocumentService) LoadDocument(documentMetaData models.DocumentMetaData, document models.DocumentData, userID uint64) (*models.ErrorReport, error) {
 
 	isValid := filesig.IsPdf(bytes.NewReader(document.DocumentBytes))
 	if !isValid {
@@ -72,7 +72,7 @@ func (serv *DocumentService) LoadDocument(documentMetaData models.DocumentMetaDa
 		return nil, errors.Wrap(err, DOCUMENT_META_SAVE_ERR_STR)
 	}
 	var errReport *models.ErrorReport
-	errReport, err = serv.reportService.CreateReport(document)
+	errReport, err = serv.reportService.CreateReport(document, userID)
 
 	if err != nil {
 		return nil, errors.Wrap(err, REPORT_ERR_STR)
@@ -91,8 +91,12 @@ func (serv *DocumentService) CreateReport(ID uuid.UUID) (*models.ErrorReport, er
 	if err != nil {
 		return nil, errors.Wrap(err, REPORT_ERR_STR)
 	}
+	documentMetaData, err := serv.docMetaRepo.GetDocumentByID(ID)
+	if err != nil {
+		return nil, errors.Wrap(err, REPORT_ERR_STR)
+	}
 
-	errReport, err = serv.reportService.CreateReport(*document)
+	errReport, err = serv.reportService.CreateReport(*document, documentMetaData.CreatorID)
 
 	if err != nil {
 		return nil, errors.Wrap(err, REPORT_ERR_STR)

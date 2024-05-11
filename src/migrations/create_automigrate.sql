@@ -29,17 +29,12 @@ CREATE TABLE IF NOT EXISTS markups (
     page_data BYTEA NOT NULL,
     error_bb JSONB DEFAULT '[]' NOT NULL,
     class_label BIGINT NOT NULL,
-    creator_id BIGINT NOT NULL
-    type_label INT NOT NULL 
+    creator_id BIGINT NOT NULL,
+    type_label INT NOT NULL,
+    was_checked BOOL NOT NULL,
+    document_id UUID
 );
 
-
-CREATE TABLE IF NOT EXISTS document_queues (
-    id serial PRIMARY KEY NOT NULL,
-    doc_id UUID NOT NULL,
-    status SMALLINT NOT NULL,
-    CONSTRAINT fk_doc_queue_docs FOREIGN KEY (doc_id) REFERENCES documents(id) ON DELETE CASCADE
-);
 
 
 CREATE TABLE IF NOT EXISTS document_queues (

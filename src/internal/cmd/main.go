@@ -114,7 +114,7 @@ func main() {
 	model := nn_adapter.NewDetectionModel(modelhandler)
 
 	reportCreator := report_creator.NewPDFReportCreator(REPORTS_CREATOR_PATH)
-	reportCreatorService := rep_creator_service.NewDocumentService(model, annotTypeRepo, reportCreator)
+	reportCreatorService := rep_creator_service.NewDocumentService(model, annotTypeRepo, reportCreator, annotRepo)
 
 	documentStorage := doc_data_repo_adapter.NewDocumentRepositoryAdapter(DOCUMENTS_PATH, DOCUMENTS_EXT)
 
@@ -181,6 +181,7 @@ func main() {
 
 			r.Delete("/delete", annot_handler.DeleteAnnot(annotService))
 			r.Get("/getsAll", annot_handler.GetAllAnnots(annotService))
+			r.Post("/check", annot_handler.Check(annotService))
 		})
 		//user
 		r.Route("/user", func(r chi.Router) {

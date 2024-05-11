@@ -218,7 +218,7 @@ func (h *Documenthandler) CreateReport() http.HandlerFunc {
 		}
 
 		var report *models.ErrorReport
-		report, err = h.docService.LoadDocument(documentMetaData, documentData)
+		report, err = h.docService.LoadDocument(documentMetaData, documentData, userID)
 		if err != nil {
 			render.JSON(w, r, response.Error(models.GetUserError(err).Error()))
 			h.logger.Error(err.Error())

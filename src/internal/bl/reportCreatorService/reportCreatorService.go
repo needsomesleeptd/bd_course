@@ -2,10 +2,12 @@ package rep_creator_service
 
 import (
 	nn "annotater/internal/bl/NN"
+	repository "annotater/internal/bl/annotationService/annotattionRepo"
 	annot_type_repository "annotater/internal/bl/anotattionTypeService/anottationTypeRepo"
 	report_creator "annotater/internal/bl/reportCreatorService/reportCreator"
 	"annotater/internal/models"
 	"bytes"
+	"fmt"
 
 	"github.com/pkg/errors"
 	"github.com/telkomdev/go-filesig"
@@ -22,20 +24,22 @@ var (
 )
 
 type IReportCreatorService interface {
-	CreateReport(document models.DocumentData) (*models.ErrorReport, error)
+	CreateReport(document models.DocumentData, userID uint64) (*models.ErrorReport, error)
 }
 
 type ReportCreatorService struct {
+	annotRepo     repository.IAnotattionRepository
 	annotTypeRepo annot_type_repository.IAnotattionTypeRepository
 	neuralNetwork nn.INeuralNetwork
 	reportWorker  report_creator.IReportCreator
 }
 
-func NewDocumentService(pNN nn.INeuralNetwork, typeRep annot_type_repository.IAnotattionTypeRepository, repCreator report_creator.IReportCreator) IReportCreatorService {
+func NewDocumentService(pNN nn.INeuralNetwork, typeRep annot_type_repository.IAnotattionTypeRepository, repCreator report_creator.IReportCreator, annRepo repository.IAnotattionRepository) IReportCreatorService {
 	return &ReportCreatorService{
 		neuralNetwork: pNN,
 		annotTypeRepo: typeRep,
 		reportWorker:  repCreator,
+		annotRepo:     annRepo,
 	}
 }
 
@@ -60,16 +64,29 @@ func (serv *ReportCreatorService) NNMarkupsReq(document models.DocumentData) ([]
 	return markups, markupTypes, err
 }
 
-func (serv *ReportCreatorService) CreateReport(document models.DocumentData) (*models.ErrorReport, error) {
+func (serv *ReportCreatorService) CreateReport(document models.DocumentData, userID uint64) (*models.ErrorReport, error) {
 
 	var report *models.ErrorReport
 	markups, markupTypes, err := serv.NNMarkupsReq(document)
+	mainErr := errors.New("error in adding anotattions")
+	for _, markup := range markups {
+		markup.CreatorID = userID
+		markup.WasChecked = false
+		markup.DocumentID = document.ID
+		err := serv.annotRepo.AddAnottation(&markup)
+		if err != nil {
+			mainErr = errors.Wrap(mainErr, fmt.Sprintf("error getting markup: %v--%w", markup, err))
+		}
+	}
 	if err != nil {
 		return nil, errors.Wrap(err, REPORT_ERR_STR)
 	}
 	report, err = serv.reportWorker.CreateReport(document.ID, markups, markupTypes)
 	if err != nil {
 		return nil, errors.Wrap(err, REPORT_ERR_STR)
+	}
+	if err != nil && mainErr != nil {
+		return report, err
 	}
 	return report, err
 }

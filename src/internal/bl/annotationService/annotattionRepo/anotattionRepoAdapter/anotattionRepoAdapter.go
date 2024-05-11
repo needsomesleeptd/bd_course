@@ -97,3 +97,19 @@ func (repo *AnotattionRepositoryAdapter) GetAllAnottations() ([]models.Markup, e
 	}
 	return markUps, err
 }
+
+func (repo *AnotattionRepositoryAdapter) UpdateAnotattion(id uint64, markUp *models.Markup) error {
+	markUpDa, err := models_da.ToDaMarkup(*markUp)
+	if err != nil {
+		return errors.Wrap(err, "Error in updating anotattion")
+	}
+	tx := repo.db.Where("id = ?", id).Updates(markUpDa)
+
+	if tx.Error == gorm.ErrRecordNotFound {
+		return models.ErrNotFound
+	}
+	if tx.Error != nil {
+		return errors.Wrap(tx.Error, "Error in updating anotattion")
+	}
+	return nil
+}

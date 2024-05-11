@@ -10,6 +10,8 @@ type Markup struct {
 	ErrorBB    []float32 `json:"error_bb"`
 	ClassLabel uint64    `json:"class_label"`
 	CreatorID  uint64    `json:"creator_id"`
+	TypeLabel  int       `json:"type_label"`
+	WasChecked bool      `json:"was_checked"`
 }
 
 func FromDtoMarkup(markup *Markup) models.Markup {
@@ -20,6 +22,8 @@ func FromDtoMarkup(markup *Markup) models.Markup {
 		ErrorBB:    markup.ErrorBB,
 		PageData:   markup.PageData,
 		CreatorID:  markup.CreatorID,
+		TypeLabel:  markup.TypeLabel,
+		WasChecked: markup.WasChecked,
 	}
 
 }
@@ -31,6 +35,8 @@ func ToDtoMarkup(markup models.Markup) *Markup {
 		ErrorBB:    markup.ErrorBB,
 		PageData:   markup.PageData,
 		CreatorID:  markup.CreatorID,
+		TypeLabel:  markup.TypeLabel,
+		WasChecked: markup.WasChecked,
 	}
 }
 

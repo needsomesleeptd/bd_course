@@ -38,6 +38,13 @@ type RequestID struct {
 	ID uint64 `json:"id"`
 }
 
+type RequestUpdate struct {
+	ID         uint64    `json:"id"`
+	ErrorBB    []float32 `json:"error_bb"`
+	ClassLabel uint64    `json:"class_label"`
+	TypeLabel  int       `json:"type_label"`
+}
+
 type ResponseGetAnnot struct {
 	response.Response
 	models_dto.Markup
@@ -148,6 +155,32 @@ func DeleteAnnot(annotService service.IAnotattionService) http.HandlerFunc {
 		}
 
 		err = annotService.DeleteAnotattion(req.ID)
+		if err != nil {
+			render.JSON(w, r, response.Error(models.GetUserError(err).Error()))
+			return
+		}
+		render.JSON(w, r, response.OK())
+	}
+}
+
+func Check(annotService service.IAnotattionService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req RequestUpdate
+		userID := r.Context().Value(auth_middleware.UserIDContextKey).(uint64)
+
+		err := render.DecodeJSON(r.Body, &req)
+		if err != nil {
+			render.JSON(w, r, response.Error(ErrDecodingRequest.Error())) //TODO:: add logging here
+			return
+		}
+		markup := models.Markup{
+			ID:         req.ID,
+			ClassLabel: req.ClassLabel,
+			TypeLabel:  req.TypeLabel,
+			ErrorBB:    req.ErrorBB,
+			CreatorID:  userID,
+		}
+		err = annotService.CheckAnotattion(&markup)
 		if err != nil {
 			render.JSON(w, r, response.Error(models.GetUserError(err).Error()))
 			return

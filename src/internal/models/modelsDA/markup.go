@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgtype"
 )
 
@@ -20,6 +21,9 @@ type Markup struct {
 	ErrorBB    pgtype.JSONB `gorm:"type:jsonb;default:'[]';not null;column:error_bb"` //because gorm cannot store slices directly(((
 	ClassLabel uint64       `gorm:"column:class_label;foreignKey:MarkupTypeID"`
 	CreatorID  uint64       `gorm:"column:creator_id;foreignKey:UserID"`
+	TypeLabel  int          `gorm:"not null;column:type_label"`
+	WasChecked bool         `gorm:"not null;column:was_checked"`
+	DocumentID uuid.UUID    `gorm:"column:document_id"`
 }
 
 func FromDaMarkup(markupDa *Markup) (models.Markup, error) {
@@ -28,6 +32,7 @@ func FromDaMarkup(markupDa *Markup) (models.Markup, error) {
 		PageData:   markupDa.PageData,
 		ClassLabel: markupDa.ClassLabel,
 		CreatorID:  markupDa.CreatorID,
+		DocumentID: markupDa.DocumentID,
 	}
 	var errorBBsJson []float32
 	err := json.Unmarshal(markupDa.ErrorBB.Bytes, &errorBBsJson)
@@ -46,6 +51,9 @@ func ToDaMarkup(markup models.Markup) (*Markup, error) {
 		PageData:   markup.PageData,
 		ClassLabel: markup.ClassLabel,
 		CreatorID:  markup.CreatorID,
+		DocumentID: markup.DocumentID,
+		TypeLabel:  markup.TypeLabel,
+		WasChecked: markup.WasChecked,
 	}
 	jsonB, err := json.Marshal(markup.ErrorBB)
 	if err != nil {

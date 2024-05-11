@@ -3,6 +3,7 @@ package main
 import (
 	nn_adapter "annotater/internal/bl/NN/NNAdapter"
 	nn_model_handler "annotater/internal/bl/NN/NNAdapter/NNmodelhandler"
+	repo_adapter "annotater/internal/bl/annotationService/annotattionRepo/anotattionRepoAdapter"
 	annot_type_repo_adapter "annotater/internal/bl/anotattionTypeService/anottationTypeRepo/anotattionTypeRepoAdapter"
 	document_service "annotater/internal/bl/documentService"
 	service "annotater/internal/bl/documentService"
@@ -72,7 +73,7 @@ func runTask(db *gorm.DB, doc *models_da.DocumentQueue, serv service.IDocumentSe
 			}
 		}
 	}
-	fmt.Printf("Successfully served document %v", doc.DocID)
+	fmt.Printf("Successfully served document %v\n", doc.DocID)
 	return nil
 }
 
@@ -92,7 +93,8 @@ func main() {
 	model := nn_adapter.NewDetectionModel(modelhandler)
 	annotTypeRepo := annot_type_repo_adapter.NewAnotattionTypeRepositoryAdapter(db)
 	reportCreator := report_creator.NewPDFReportCreator(REPORTS_CREATOR_PATH)
-	reportCreatorService := rep_creator_service.NewDocumentService(model, annotTypeRepo, reportCreator)
+	annotRepo := repo_adapter.NewAnotattionRepositoryAdapter(db)
+	reportCreatorService := rep_creator_service.NewDocumentService(model, annotTypeRepo, reportCreator, annotRepo)
 
 	documentStorage := doc_data_repo_adapter.NewDocumentRepositoryAdapter(DOCUMENTS_PATH, DOCUMENTS_EXT)
 
