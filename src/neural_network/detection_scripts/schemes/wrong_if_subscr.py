@@ -1,5 +1,5 @@
 # tnr19u668
-
+# broken --  Unrecognized keyword arguments passed to Dense: {'weights': [array([[0., 0., 0., 0., 0., 0.], something with weights
 
 
 import cv2 as cv

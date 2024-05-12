@@ -1,5 +1,6 @@
 # vea19u756
 
+from detection_scripts.schemes.scheme_err_detector import *
 import cv2
 import numpy as np
 import os
@@ -7,11 +8,16 @@ import os
 import os
 os.environ["TESSDATA_PREFIX"] = "."
 import easyocr
+from matplotlib import pyplot as plt
+
+SCHEME_IF_SUBS_ERR_CLASS =  162
+
 def DrawContours(image, contours, name):
     cont = image.copy()
     for contour in contours:
         cv2.drawContours(cont, [contour], 0, (0, 255, 0), 3)
-    cv2.imwrite(name, cont)
+    return cont
+    #cv2.imwrite(name, cont)
 def FindContours(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     edges = cv2.Canny(gray, 50, 150)
@@ -29,7 +35,8 @@ def Find4AngleContours(image):
             angle4_contours.append(approx)
     return angle4_contours
             
-def FindIfContours(image):
+def FindIfContours(pil_image):
+    image = convert_pil_to_cv2_img(pil_image)
     angle4_contours = Find4AngleContours(image)
     parallelograms = []
     for approx in angle4_contours:
@@ -44,7 +51,8 @@ def FindIfContours(image):
         if not check_90:
             parallelograms.append(approx)
     return parallelograms
-def AnalyzeText(image, parallelograms):
+def AnalyzeText(pil_image, parallelograms):
+    image = convert_pil_to_cv2_img(pil_image)
     found = False
     for r in parallelograms:
         x, y, w, h = cv2.boundingRect(r)
@@ -66,7 +74,31 @@ def AnalyzeText(image, parallelograms):
 
 
 
-image = cv2.imread("scheme_trig.png")
-parallelograms = FindIfContours(image)
-error_found = AnalyzeText(image, parallelograms)
-print(error_found)
+class IfSubscriptionErrDetector(SchemeErrorDetector):
+    def __init__(self):
+        self.detected_image = None
+  
+    def detect_error(self, image: any) -> bool:
+        parallelograms = FindIfContours(image)
+        img_cv = convert_pil_to_cv2_img(image)
+        img_cv= DrawContours(img_cv,parallelograms,"detected")
+        error_found = AnalyzeText(image, parallelograms)
+        self.detected_image = img_cv
+        return error_found
+
+
+
+    def get_err_class(self):
+        return  SCHEME_IF_SUBS_ERR_CLASS
+   
+    def get_detected_image(self):
+        return self.detected_image
+
+if __name__ == "__main__":
+    #image_file = get_args_console()
+    image = Image.open("scheme_trig.png")
+    detector = IfSubscriptionErrDetector()
+    print(detector.detect_error(image))
+    plt.imshow(detector.detected_image)
+    plt.show()
+

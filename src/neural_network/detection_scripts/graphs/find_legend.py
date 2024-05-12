@@ -1,13 +1,18 @@
 # mmd19u555
+
+from detection_scripts.graphs.graphs_err_detector import  GraphsErrorDetector
+from PIL import Image
 from imutils.object_detection import non_max_suppression
 import numpy as np
 import cv2
 import os
 
-_EAST_MODEL_PATH = 'model/frozen_east_text_detection.pb'
+_EAST_MODEL_PATH = '/home/andrew/uni/db_course/bd_course/src/neural_network/detection_scripts/graphs/model/frozen_east_text_detection.pb'
 _LINE_MAX_OFFSET = 80
 _LINE_CENTER_OFFSET_PART = 3
 _HORIZONTAL_KERNEL_SIZE_PART = 40
+
+GRAPH_LEGEND_ERR_CLASS = 191
 
 def _ShowWaitDestroy(winname, img):
     cv2.imshow(winname, img)
@@ -15,8 +20,10 @@ def _ShowWaitDestroy(winname, img):
     cv2.waitKey(0)
     cv2.destroyWindow(winname)
 
-def _GetTextRegions(filename, minProb=0.7, debug=False):
-    image = cv2.imread(filename)
+def _GetTextRegions(pil_image, minProb=0.7, debug=False):
+    arr_image = np.array(pil_image)
+    image = cv2.cvtColor(arr_image, cv2.COLOR_RGB2BGR)
+
     orig = np.copy(image)
     (H, W) = image.shape[:2]
 
@@ -117,9 +124,10 @@ def _GetTextRegions(filename, minProb=0.7, debug=False):
 
     return boxes
 
-def _GetHorizontals(filename, debug=False):
-    # Read the image
-    img = cv2.imread(filename)
+def _GetHorizontals(pil_image, debug=False):
+    arr_image = np.array(pil_image)
+    img = cv2.cvtColor(arr_image, cv2.COLOR_RGB2BGR)
+    
 
     # Convert the image to grayscale
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -144,10 +152,11 @@ def _GetHorizontals(filename, debug=False):
 
     return horizontal
 
-def HasLegend(filename, debug=False):
-    textBoxes = _GetTextRegions(filename, debug=debug)
-    horizontals = _GetHorizontals(filename, debug=debug)
+def HasLegend(image, debug=False):
+    textBoxes = _GetTextRegions(image, debug=debug)
+    horizontals = _GetHorizontals(image, debug=debug)
 
+    possibleHorLineRegion = None
     for (startX, startY, endX, endY) in textBoxes:
         startLineX = startX - _LINE_MAX_OFFSET if startX - _LINE_MAX_OFFSET > 0 else 0
         centerOffset = (endY - startY) // _LINE_CENTER_OFFSET_PART
@@ -156,11 +165,30 @@ def HasLegend(filename, debug=False):
         if np.sum(possibleHorLineRegion) > 0:
             if debug:
                 _ShowWaitDestroy('test', possibleHorLineRegion)
-            return True
+            return True,possibleHorLineRegion
     
-    return False
+    return False,possibleHorLineRegion
+
+
+class LegendErrorDetector(GraphsErrorDetector):
+    def __init__(self):
+        self.detected_image = None
+  
+    def detect_error(self, image: any) -> bool:
+        res,img = HasLegend(image)
+        self.detected_image = img
+        return not res
+        
+  
+    def get_err_class(self) -> int:
+        return GRAPH_LEGEND_ERR_CLASS
+
+   
+    def get_detected_image(self):
+        return self.detected_image
 
 if __name__ == "__main__":
-    print(HasLegend('image.png', debug=False))
-    exit()
- 
+    image = Image.open("image.png")
+    detector = LegendErrorDetector()
+    print(detector.detect_error(image))
+    

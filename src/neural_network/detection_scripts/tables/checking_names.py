@@ -1,6 +1,13 @@
 import cv2
 import pytesseract
 import re
+import os
+from matplotlib import pyplot as plt
+from detection_scripts.tables.table_err_detector import * 
+
+NO_TABLE_NAME_ERR_CLASS =  171
+
+TABLE_WRONG_NAME_ERR_CLASS =  172
 
 
 def find_table(thresh, image):
@@ -80,7 +87,40 @@ def verification(text, text_border, table_border):
 
     return errors
 
+
+
+class TableNameErrDetector(TableErrorDetector):
+    def __init__(self):
+        self.detected_image = None
+        self.err_class = NO_TABLE_NAME_ERR_CLASS
+        os.environ["TESSDATA_PREFIX"] = r"/usr/share/tesseract-ocr/4.00/tessdata"
+        pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
+    def get_err_class(self) -> int:
+        return self.err_class
+
+    def detect_error(self, image: any) -> bool:
+        image_cv = convert_pil_to_cv2_img(image)
+
+        gray = cv2.cvtColor(image_cv, cv2.COLOR_BGR2GRAY)
+        thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+        table_border = find_table(thresh, image_cv)
+        text, text_border = find_table_name(thresh, image_cv)
+        self.detected_image = image_cv
+        if not text :
+            return True
+        errors = verification(text, text_border, table_border)
+        if errors > 0:
+            self.err_class = TABLE_WRONG_NAME_ERR_CLASS
+            return True
+        return False
+        
+   
+    def get_detected_image(self):
+        return self.detected_image
     
+
+
+
 
 def main():
     pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
@@ -109,4 +149,10 @@ def main():
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    main()
+   
+    image = Image.open("table.png")
+    detector = TableNameErrDetector()
+    print(detector.detect_error(image))
+    plt.imshow(detector.detected_image)
+    plt.show()
+

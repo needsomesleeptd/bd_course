@@ -182,7 +182,6 @@ func main() {
 			r.Delete("/delete", annot_handler.DeleteAnnot(annotService))
 			r.Get("/getsAll", annot_handler.GetAllAnnots(annotService))
 			r.Post("/check", annot_handler.Check(annotService))
-			r.Post("/validate")
 		})
 		//user
 		r.Route("/user", func(r chi.Router) {

@@ -3,6 +3,8 @@ import cv2
 import numpy as np
 # broken -- no -- rt
 
+
+
 def split_and_scale_image(image, num_parts, scale_factor):
 
     output_image = cv2.resize(image, None, fx=scale_factor, fy=scale_factor)
@@ -35,7 +37,7 @@ def find_tip(points, convex_hull):
 
 
 
-image = cv2.imread('ex3.png')
+
 
 num_parts = 8  
 scale_factor = 0.1  

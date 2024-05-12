@@ -4,6 +4,7 @@ import (
 	"annotater/internal/models"
 	bboxes_utils "annotater/tech_ui/utils/bboxes"
 	"bytes"
+	"errors"
 	"fmt"
 	"image"
 	"image/color"
@@ -21,7 +22,7 @@ var (
 	pdfFileFilename = "check.pdf"
 	imgFolderPath   = "images/"
 	fileFormat      = ".png"
-	texHeader       = "\\documentclass{article}\n\\usepackage{graphicx}\n\n\\begin{document}\n\\section{Error Report}\n"
+	texHeader       = "\\documentclass{article}\n\\usepackage[utf8]{inputenc}\n\\usepackage[T1,T2A]{fontenc}\n\\usepackage[russian,english]{babel}\n\\usepackage{graphicx}\n\\begin{document}\n\\section{Отчет об ошибках}\n"
 	texTail         = "\\end{document}"
 )
 
@@ -118,7 +119,7 @@ func (cr *PDFReportCreator) CreateReport(reportID uuid.UUID, markups []models.Ma
 
 	imgPaths, err := cr.saveImagesWithBBs(senderFolderPath+imgFolderPath, markups)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(fmt.Sprintf("Error saving images-%v", err.Error()))
 	}
 	// Start writing LaTeX content
 	content := texHeader
@@ -166,5 +167,6 @@ func (cr *PDFReportCreator) CreateReport(reportID uuid.UUID, markups []models.Ma
 		DocumentID: reportID,
 		ReportData: pdfByteSlice,
 	}
+
 	return &report, nil
 }

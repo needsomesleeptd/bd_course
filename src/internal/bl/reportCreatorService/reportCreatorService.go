@@ -76,7 +76,7 @@ func (serv *ReportCreatorService) CreateReport(document models.DocumentData, use
 		markup.IsValid = false
 		err := serv.annotRepo.AddAnottation(&markup)
 		if err != nil {
-			mainErr = errors.Wrap(mainErr, fmt.Sprintf("error getting markup: %v--%w", markup, err))
+			mainErr = errors.Wrap(mainErr, fmt.Sprintf("error sending markup: %v--%w", markup, err))
 		}
 	}
 	if err != nil {

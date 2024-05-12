@@ -1,7 +1,10 @@
 #tle19u857
 import math, cv2, sys
 import numpy as np
+from detection_scripts.schemes.scheme_err_detector import *
 
+
+SCHEME_ARR_DEST_ERR_CLASS = 161
 
 def get_filter_arrow_image(threslold_image):
     blank_image = np.zeros_like(threslold_image)
@@ -111,14 +114,15 @@ def get_args_console():
 
     return image_file
 
-def preprocess_image(image):
+def preprocess_image(pil_image):
     '''
     Предобработка изображения (удаление элементов схемы алгоритма)
     '''
+    image = convert_pil_to_cv2_img(pil_image)
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     gray_blur = cv2.GaussianBlur(gray_image, (3, 3), 1)
     edged = cv2.Canny(gray_blur, 10, 250)
-    cv2.imshow("thresh_image", edged)
+    #cv2.imshow("thresh_image", edged)
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
     closed = cv2.morphologyEx(edged, cv2.MORPH_CLOSE, kernel)
     _, thresh_image = cv2.threshold(edged, 100, 255, cv2.THRESH_BINARY_INV)
@@ -167,7 +171,8 @@ def recognize_arrow(image):
 
     return arrow_tips, approxes
 
-def is_valid_arrow(image, arrow_tips, approxes):
+def is_valid_arrow(pil_image, arrow_tips, approxes):
+    image = convert_pil_to_cv2_img(pil_image)
     is_changed = False; is_valid_arrow = True
     for i, arrow_tip in enumerate(arrow_tips):
         min_index = np.argmin(approxes[i][:,1], axis=0)
@@ -188,14 +193,41 @@ def is_valid_arrow(image, arrow_tips, approxes):
     #    cv2.waitKey(0)
     #    cv2.destroyAllWindows()
     return is_valid_arrow
-    
+
+
+
+
+class ArrowsDestinationErrDetector(SchemeErrorDetector):
+    def __init__(self):
+        self.detected_image = None
+  
+    def detect_error(self, image: any) -> bool:
+        image_work = image.copy()
+        image_preprocess = preprocess_image(image_work)
+        arrow_tips, approxes = recognize_arrow(image_preprocess)
+        is_valid_schema = is_valid_arrow(image, arrow_tips, approxes)
+        self.detected_image = image_preprocess
+        return not is_valid_schema
+
+
+
+    def get_err_class(self):
+        return  SCHEME_ARR_DEST_ERR_CLASS
+   
+    def get_detected_image(self):
+        return self.detected_image
+
+
 if __name__ == "__main__":
-    image_file = get_args_console()
+    #image_file = get_args_console()
+    image = Image.open("ex3.png")
+    detector = ArrowsDestinationErrDetector()
+    print(detector.detect_error(image))
 
-    image_input = cv2.imread(image_file)
-    image_work = image_input.copy()
-    image_preprocess = preprocess_image(image_work)
-    arrow_tips, approxes = recognize_arrow(image_preprocess)
-    is_valid_schema = is_valid_arrow(image_input, arrow_tips, approxes)
+#    image_input = cv2.imread(image_file)
+#    image_work = image_input.copy()
+#    image_preprocess = preprocess_image(image_work)
+#    arrow_tips, approxes = recognize_arrow(image_preprocess)
+#    is_valid_schema = is_valid_arrow(image_input, arrow_tips, approxes)
 
-    print(f'{image_file}: {"OK" if is_valid_schema==True else "ERROR"}') 
+#    print(f'{image_file}: {"OK" if is_valid_schema==True else "ERROR"}') 

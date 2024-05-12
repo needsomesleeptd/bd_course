@@ -2,6 +2,11 @@
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
+from detection_scripts.graphs.graphs_err_detector import convert_pil_to_cv2_img,GraphsErrorDetector
+from PIL  import Image
+
+GRAPH_AXIS_SUBS_ERR_CLASS = 192
+BIN_THRESHHOLD = 140
 
 def contours_to_tuple4(contours):
     return [cv2.boundingRect(cnt) for cnt in contours]
@@ -120,8 +125,9 @@ def remove_bottom_text_contours(contours, image_h):
     return list(filter(lambda c: c[1] < 4 * image_h / 5, contours))
 
 
-def image_has_wrong_axis_title(image_path, bin_threshold, show_images=True):
-    img = cv2.imread(image_path)
+def image_has_wrong_axis_title(pil_img, bin_threshold, show_images=True):
+    img = convert_pil_to_cv2_img(pil_img)
+
     bin_img = remove_colored_lines(img, bin_threshold)
 
     rect_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (8, 8))
@@ -140,23 +146,39 @@ def image_has_wrong_axis_title(image_path, bin_threshold, show_images=True):
     res = unpack_contours(wrong_contours)
 
     if len(res) > 0:
+        draw_contours_on_image(im2, res)
         if show_images:
             draw_contours_on_image(im2, res)
             plt.imshow(dilation)
             plt.show()
             plt.imshow(im2)
             plt.show()
-        return True
-    return False
+        return True,im2
+    return False,im2
 
 
-if __name__ == '__main__':
-    bin_threshold = 140
-    show_images = False
 
-    image_path = 'image.png'
-    res = image_has_wrong_axis_title(image_path, bin_threshold, show_images)
-    if res:
-        print('Ошибка в подписях к осям графика!')
-    else:
-        print('Все нормально')
+class AxisSubsErrorDetector(GraphsErrorDetector):
+    def __init__(self):
+        self.detected_image = None
+  
+    def detect_error(self, image: any) -> bool:
+        res,img = image_has_wrong_axis_title(image, BIN_THRESHHOLD, show_images=False)
+        self.detected_image = img
+        return res
+        
+  
+    def get_err_class(self) -> int:
+        return GRAPH_AXIS_SUBS_ERR_CLASS
+
+   
+    def get_detected_image(self):
+        return self.detected_image
+
+
+
+
+if __name__ == "__main__":
+    image = Image.open("image.png")
+    detector = AxisSubsErrorDetector()
+    print(detector.detect_error(image))
