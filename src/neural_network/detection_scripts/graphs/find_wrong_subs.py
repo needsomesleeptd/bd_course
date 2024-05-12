@@ -1,3 +1,4 @@
+# mia19u558
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
@@ -153,7 +154,7 @@ if __name__ == '__main__':
     bin_threshold = 140
     show_images = False
 
-    image_path = 'err.png'
+    image_path = 'image.png'
     res = image_has_wrong_axis_title(image_path, bin_threshold, show_images)
     if res:
         print('Ошибка в подписях к осям графика!')

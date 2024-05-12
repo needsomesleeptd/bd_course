@@ -1,7 +1,7 @@
 import random
 import cv2
 import numpy as np
-
+# broken -- no -- rt
 
 def split_and_scale_image(image, num_parts, scale_factor):
 
