@@ -25,6 +25,8 @@ import (
 	"annotater/internal/middleware/auth_middleware"
 	models_da "annotater/internal/models/modelsDA"
 	auth_utils "annotater/internal/pkg/authUtils"
+	cache_utils "annotater/internal/pkg/cacheUtils"
+	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -35,6 +37,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -48,6 +51,7 @@ var (
 	DOCUMENTS_PATH       = "../../../documents"
 	DOCUMENTS_EXT        = ".pdf"
 	REPORTS_EXT          = ".pdf"
+	SESSION_PATH         = "localhost:6379"
 )
 
 // andrew1 2
@@ -93,6 +97,31 @@ func main() {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}*/
+	clientAnnotsCache := redis.NewClient(&redis.Options{
+		Addr:     SESSION_PATH,
+		Password: "",
+		DB:       1,
+	})
+	_, err = clientAnnotsCache.Ping(context.TODO()).Result()
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+
+	clientDocumentCache := redis.NewClient(&redis.Options{
+		Addr:     SESSION_PATH,
+		Password: "",
+		DB:       2,
+	})
+	_, err = clientDocumentCache.Ping(context.TODO()).Result()
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+
+	//cache
+	annotCache := cache_utils.NewReddisCache(clientAnnotsCache, context.TODO(), 1024, time.Hour)
+	documentCache := cache_utils.NewReddisCache(clientDocumentCache, context.TODO(), 1024, time.Hour)
 
 	//auth service
 	userRepo := user_repo_adapter.NewUserRepositoryAdapter(db)
@@ -101,7 +130,8 @@ func main() {
 	authService := auth_service.NewAuthService(userRepo, hasher, tokenHandler, auth_service.SECRET)
 
 	//annot service
-	annotRepo := annot_repo_adapter.NewAnotattionRepositoryAdapter(db)
+
+	annotRepo := annot_repo_adapter.NewAnotattionRepositoryAdapter(db, annotCache)
 	annotService := annot_service.NewAnnotattionService(annotRepo)
 
 	//annotType service
@@ -120,7 +150,7 @@ func main() {
 
 	reportStorage := rep_data_repo_adapter.NewDocumentRepositoryAdapter(REPORTS_PATH, REPORTS_EXT)
 
-	documentRepo := document_repo_adapter.NewDocumentRepositoryAdapter(db)
+	documentRepo := document_repo_adapter.NewDocumentRepositoryAdapter(db, documentCache)
 	documentService := document_service.NewDocumentService(documentRepo, documentStorage, reportStorage, reportCreatorService)
 
 	//userService 0_0

@@ -1,5 +1,12 @@
 version: "3.9"
 services:
+
+  redis-cache:
+    image: redis:alpine
+    ports:
+      - 6379:6379
+    container_name: redis-cache
+    
   postgres:
     container_name: my_bd
     image: postgres:13.3

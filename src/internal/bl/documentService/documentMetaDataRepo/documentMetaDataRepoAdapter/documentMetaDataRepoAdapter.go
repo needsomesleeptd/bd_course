@@ -4,19 +4,26 @@ import (
 	repository "annotater/internal/bl/documentService/documentMetaDataRepo"
 	"annotater/internal/models"
 	models_da "annotater/internal/models/modelsDA"
+	cache_utils "annotater/internal/pkg/cacheUtils"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 )
 
+var (
+	creatorIDPrefix = "crator_id_"
+)
+
 type DocumentMetaDataRepositoryAdapter struct {
-	db *gorm.DB
+	db    *gorm.DB
+	cache cache_utils.ICache
 }
 
-func NewDocumentRepositoryAdapter(srcDB *gorm.DB) repository.IDocumentMetaDataRepository {
+func NewDocumentRepositoryAdapter(srcDB *gorm.DB, cacheSrc cache_utils.ICache) repository.IDocumentMetaDataRepository {
 	return &DocumentMetaDataRepositoryAdapter{
-		db: srcDB,
+		db:    srcDB,
+		cache: cacheSrc,
 	}
 }
 
@@ -31,19 +38,42 @@ func (repo *DocumentMetaDataRepositoryAdapter) AddDocument(doc *models.DocumentM
 
 func (repo *DocumentMetaDataRepositoryAdapter) GetDocumentByID(id uuid.UUID) (*models.DocumentMetaData, error) {
 	var documentDa models_da.Document
-	documentDa.ID = id
-	tx := repo.db.First(&documentDa)
-	if tx.Error == gorm.ErrRecordNotFound {
-		return nil, models.ErrNotFound
+	idReq := id.String()
+	err := repo.cache.Get(idReq, &documentDa)
+	if err != nil && err != models.ErrNotFound {
+		return nil, err
 	}
-	if tx.Error != nil {
-		return nil, errors.Wrap(tx.Error, "Error getting document by ID")
+	if err := repo.cache.Get(idReq, &documentDa); err != nil {
+
+		documentDa.ID = id
+		tx := repo.db.Where("id = ?", id).First(&documentDa)
+		if tx.Error == gorm.ErrRecordNotFound {
+			return nil, models.ErrNotFound
+		}
+		if tx.Error != nil {
+			return nil, errors.Wrap(tx.Error, "Error getting document by ID")
+		}
 	}
+	if err != nil && err != models.ErrNotFound {
+		return nil, err
+
+	}
+	err = repo.cache.Set(idReq, documentDa)
+	if err != nil {
+		return nil, err
+	}
+
 	document := models_da.FromDaDocument(&documentDa)
 	return &document, nil
 }
 
 func (repo *DocumentMetaDataRepositoryAdapter) DeleteDocumentByID(id uuid.UUID) error {
+
+	err := repo.cache.Del(id.String())
+	if err != nil {
+		return err
+	}
+
 	tx := repo.db.Delete(models.DocumentMetaData{}, id) // specifically for gorm
 	if tx.Error != nil {
 		return errors.Wrap(tx.Error, "Error in deleting document")
@@ -72,6 +102,13 @@ func (repo *DocumentMetaDataRepositoryAdapter) GetDocumentCountByCreator(id uint
 
 func (repo *DocumentMetaDataRepositoryAdapter) UpdateData(id uuid.UUID, data models.DocumentMetaData) error {
 	dataDA := models_da.ToDaDocument(data)
+
+	idReq := id.String()
+	err := repo.cache.Del(id.String())
+	if err != nil {
+		return err
+	}
+
 	tx := repo.db.Model(models_da.Document{}).Where("id = ?", id).Updates(dataDA)
 
 	if tx.Error == gorm.ErrRecordNotFound {
@@ -79,6 +116,10 @@ func (repo *DocumentMetaDataRepositoryAdapter) UpdateData(id uuid.UUID, data mod
 	}
 	if tx.Error != nil {
 		return errors.Wrap(tx.Error, "Error in getting count by creator")
+	}
+	err = repo.cache.Set(idReq, dataDA)
+	if err != nil {
+		return err
 	}
 	return nil
 }

@@ -4,23 +4,28 @@ import (
 	repository "annotater/internal/bl/annotationService/annotattionRepo"
 	"annotater/internal/models"
 	models_da "annotater/internal/models/modelsDA"
+	cache_utils "annotater/internal/pkg/cacheUtils"
 	"fmt"
+	"strconv"
 
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 )
 
 var (
-	ErrNothingDelete = errors.New("nothing was deleted")
+	ErrNothingDelete  = errors.New("nothing was deleted")
+	userIDCachePrefix = "user_id"
 )
 
 type AnotattionRepositoryAdapter struct {
-	db *gorm.DB
+	db    *gorm.DB
+	cache cache_utils.ICache
 }
 
-func NewAnotattionRepositoryAdapter(srcDB *gorm.DB) repository.IAnotattionRepository {
+func NewAnotattionRepositoryAdapter(srcDB *gorm.DB, cacheSrc cache_utils.ICache) repository.IAnotattionRepository {
 	return &AnotattionRepositoryAdapter{
-		db: srcDB,
+		db:    srcDB,
+		cache: cacheSrc,
 	}
 }
 
@@ -40,11 +45,17 @@ func (repo *AnotattionRepositoryAdapter) AddAnottation(markUp *models.Markup) er
 }
 
 func (repo *AnotattionRepositoryAdapter) DeleteAnotattion(id uint64) error { // do we need transactions here?
+	strID := strconv.FormatUint(id, 10)
+	err := repo.cache.Del(strID)
+	if err != nil {
+		return errors.Wrap(err, "Error in deleting anotattion cache")
+	}
 	tx := repo.db.Where("id = ?", id) //using that because if id is equal to 0 then the first found row will be deleted
 	if tx.Error != nil {
 		return errors.Wrap(tx.Error, "Error in deleting anotattion")
 	}
 	fmt.Print(tx.Error)
+
 	tx = tx.Delete(&models_da.Markup{})
 	if tx.Error != nil {
 		return errors.Wrap(tx.Error, "Error in deleting anotattion")
@@ -57,15 +68,24 @@ func (repo *AnotattionRepositoryAdapter) DeleteAnotattion(id uint64) error { // 
 
 func (repo *AnotattionRepositoryAdapter) GetAnottationByID(id uint64) (*models.Markup, error) {
 	var markUpDA models_da.Markup
-	tx := repo.db.Where("id = ?", id).First(&markUpDA)
+	strID := strconv.FormatUint(id, 10)
+	if err := repo.cache.Get(strID, &markUpDA); err != nil {
 
-	if tx.Error == gorm.ErrRecordNotFound {
-		return nil, models.ErrNotFound
+		tx := repo.db.Where("id = ?", id).First(&markUpDA)
+
+		if tx.Error == gorm.ErrRecordNotFound {
+			return nil, models.ErrNotFound
+		}
+
+		if tx.Error != nil {
+			return nil, errors.Wrap(tx.Error, "Error in getting anotattion type")
+		}
+	}
+	err := repo.cache.Set(strID, &markUpDA)
+	if err != nil {
+		return nil, err
 	}
 
-	if tx.Error != nil {
-		return nil, errors.Wrap(tx.Error, "Error in getting anotattion type")
-	}
 	markUpType, err := models_da.FromDaMarkup(&markUpDA)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error in getting anotattion type")
@@ -75,6 +95,7 @@ func (repo *AnotattionRepositoryAdapter) GetAnottationByID(id uint64) (*models.M
 func (repo *AnotattionRepositoryAdapter) GetAnottationsByUserID(id uint64) ([]models.Markup, error) {
 	var markUpsDA []models_da.Markup
 	tx := repo.db.Where("creator_id = ?", id).Find(&markUpsDA)
+
 	if tx.Error != nil {
 		return nil, errors.Wrap(tx.Error, "Error in getting anotattion type")
 	}
@@ -87,10 +108,12 @@ func (repo *AnotattionRepositoryAdapter) GetAnottationsByUserID(id uint64) ([]mo
 
 func (repo *AnotattionRepositoryAdapter) GetAllAnottations() ([]models.Markup, error) {
 	var markUpsDA []models_da.Markup
+
 	tx := repo.db.Find(&markUpsDA)
 	if tx.Error != nil {
 		return nil, errors.Wrap(tx.Error, "Error in getting anotattion type")
 	}
+
 	markUps, err := models_da.FromDaMarkupSlice(markUpsDA)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error in getting all markups")
@@ -100,6 +123,8 @@ func (repo *AnotattionRepositoryAdapter) GetAllAnottations() ([]models.Markup, e
 
 func (repo *AnotattionRepositoryAdapter) UpdateAnotattion(id uint64, markUp *models.Markup) error {
 	markUpDa, err := models_da.ToDaMarkup(*markUp)
+
+	strID := strconv.FormatUint(id, 10)
 	if err != nil {
 		return errors.Wrap(err, "Error in updating anotattion")
 	}
@@ -110,6 +135,10 @@ func (repo *AnotattionRepositoryAdapter) UpdateAnotattion(id uint64, markUp *mod
 	}
 	if tx.Error != nil {
 		return errors.Wrap(tx.Error, "Error in updating anotattion")
+	}
+	err = repo.cache.Set(strID, markUpDa)
+	if err != nil {
+		return err
 	}
 	return nil
 }
