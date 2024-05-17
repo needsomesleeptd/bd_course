@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS users (
    id serial PRIMARY KEY,
    login VARCHAR(255) UNIQUE NOT NULL,
    password VARCHAR(255) NOT NULL,
-   name VARCHAR(255),
+   name VARCHAR(255) NOT NULL,
    surname VARCHAR(255) NOT NULL,
    role INT NOT NULL,
    user_group VARCHAR(255) NOT NULL 
@@ -63,6 +63,7 @@ CREATE TABLE IF NOT EXISTS achievments (
     description text NOT NULL,
     creator_id INT NOT NULL,
     granted_to_id INT NOT NULL,
+    page_data BYTEA NOT NULL,
     CONSTRAINT fk_comment_creator FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT fk_comment_granted FOREIGN KEY (granted_to_id) REFERENCES users(id) ON DELETE CASCADE
 );

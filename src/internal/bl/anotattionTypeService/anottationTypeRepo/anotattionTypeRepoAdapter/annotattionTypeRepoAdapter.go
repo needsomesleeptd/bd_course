@@ -4,18 +4,23 @@ import (
 	repository "annotater/internal/bl/anotattionTypeService/anottationTypeRepo"
 	"annotater/internal/models"
 	models_da "annotater/internal/models/modelsDA"
+	cache_utils "annotater/internal/pkg/cacheUtils"
+	"fmt"
+	"strconv"
 
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 )
 
 type AnotattionTypeRepositoryAdapter struct {
-	db *gorm.DB
+	db    *gorm.DB
+	cache cache_utils.ICache
 }
 
-func NewAnotattionTypeRepositoryAdapter(srcDB *gorm.DB) repository.IAnotattionTypeRepository {
+func NewAnotattionTypeRepositoryAdapter(srcDB *gorm.DB, cacheSrc *cache_utils.ICache) repository.IAnotattionTypeRepository {
 	return &AnotattionTypeRepositoryAdapter{
-		db: srcDB,
+		db:    srcDB,
+		cache: *cacheSrc,
 	}
 }
 
@@ -45,20 +50,34 @@ func (repo *AnotattionTypeRepositoryAdapter) DeleteAnotattionType(id uint64) err
 		}
 		return nil
 	})
+	if err != nil {
+		return err
+	}
+	strID := strconv.FormatUint(id, 10)
+	err = repo.cache.Del(strID)
+	if err != nil {
+		fmt.Print(err)
+	}
 	return err
 }
 
 func (repo *AnotattionTypeRepositoryAdapter) GetAnottationTypeByID(id uint64) (*models.MarkupType, error) {
 	var markUpTypeDA models_da.MarkupType
 	markUpTypeDA.ID = id
-	tx := repo.db.Where("id = ?", id).First(&markUpTypeDA)
-	if tx.Error == gorm.ErrRecordNotFound {
-		return nil, models.ErrNotFound
-	}
 
-	if tx.Error != nil {
-		return nil, errors.Wrap(tx.Error, "Error in getting anotattion type db")
+	strId := strconv.FormatUint(id, 10)
+	err := repo.cache.Get(strId, &markUpTypeDA)
+	if err != nil {
+
+		tx := repo.db.Where("id = ?", id).First(&markUpTypeDA)
+		if tx.Error == gorm.ErrRecordNotFound {
+			return nil, models.ErrNotFound
+		}
+		if tx.Error != nil {
+			return nil, errors.Wrap(tx.Error, "Error in getting anotattion type db")
+		}
 	}
+	repo.cache.Set(strId, markUpTypeDA)
 	markUpType := models_da.FromDaMarkupType(&markUpTypeDA)
 	return &markUpType, nil
 }

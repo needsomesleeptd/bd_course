@@ -119,10 +119,21 @@ func main() {
 		os.Exit(1)
 	}
 
+	clientAnnotTypeCache := redis.NewClient(&redis.Options{
+		Addr:     SESSION_PATH,
+		Password: "",
+		DB:       2,
+	})
+	_, err = clientAnnotTypeCache.Ping(context.TODO()).Result()
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+
 	//cache
 	annotCache := cache_utils.NewReddisCache(clientAnnotsCache, context.TODO(), 1024, time.Hour)
 	documentCache := cache_utils.NewReddisCache(clientDocumentCache, context.TODO(), 1024, time.Hour)
-
+	annotTypeCache := cache_utils.NewReddisCache(clientAnnotTypeCache, context.TODO(), 1024, time.Hour)
 	//auth service
 	userRepo := user_repo_adapter.NewUserRepositoryAdapter(db)
 	hasher := auth_utils.NewPasswordHashCrypto()
@@ -135,7 +146,7 @@ func main() {
 	annotService := annot_service.NewAnnotattionService(annotRepo)
 
 	//annotType service
-	annotTypeRepo := annot_type_repo_adapter.NewAnotattionTypeRepositoryAdapter(db)
+	annotTypeRepo := annot_type_repo_adapter.NewAnotattionTypeRepositoryAdapter(db, &annotTypeCache)
 	annotTypeService := annot_type_service.NewAnotattionTypeService(annotTypeRepo)
 
 	//document service
@@ -232,9 +243,9 @@ func main() {
 	srv := &http.Server{
 		Addr:         "0.0.0.0:8080",
 		Handler:      router,
-		ReadTimeout:  40 * time.Second,
-		WriteTimeout: 40 * time.Second,
-		IdleTimeout:  40 * time.Second,
+		ReadTimeout:  60 * time.Second,
+		WriteTimeout: 60 * time.Second,
+		IdleTimeout:  60 * time.Second,
 	}
 
 	go func() {

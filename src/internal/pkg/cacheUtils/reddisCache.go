@@ -25,6 +25,11 @@ type ReddisCache struct {
 }
 
 func NewReddisCache(redSrc *redis.Client, ctxSrc context.Context, maxBytesSrc uint, ttlDurSrc time.Duration) ICache {
+	err := redSrc.ConfigSet(context.TODO(), "maxmemory", "1GB").Err()
+	if err != nil {
+		fmt.Print(err)
+	}
+
 	return ReddisCache{
 		redis:    redSrc,
 		ctx:      ctxSrc,
@@ -58,7 +63,7 @@ func (r ReddisCache) Get(key string, value interface{}) error {
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("error in reddis unmarshalling value %v", value))
 	}
-	fmt.Print("cache used successfully")
+	//fmt.Print("cache used successfully")
 	return nil
 }
 

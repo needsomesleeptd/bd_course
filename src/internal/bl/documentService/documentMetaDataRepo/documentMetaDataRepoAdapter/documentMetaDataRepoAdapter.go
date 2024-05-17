@@ -83,9 +83,18 @@ func (repo *DocumentMetaDataRepositoryAdapter) DeleteDocumentByID(id uuid.UUID) 
 func (repo *DocumentMetaDataRepositoryAdapter) GetDocumentsByCreatorID(id uint64) ([]models.DocumentMetaData, error) {
 	var documentsDA []models_da.Document
 	tx := repo.db.Where("creator_id = ?", id).Find(&documentsDA)
+	//strID := strconv.FormatUint(id, 10)
+	//err := repo.cache.Get(strID, &documentsDA)
+	//if err != nil {
+
 	if tx.Error != nil {
 		return nil, errors.Wrap(tx.Error, "Error in getting documents by creator")
 	}
+	//	}
+	/*err = repo.cache.Set(strID, documentsDA)
+	if err != nil {
+		fmt.Print(err.Error()) //  TODO::add logging
+	}*/
 	documents := models_da.FromDaDocumentSlice(documentsDA)
 	return documents, nil
 }
