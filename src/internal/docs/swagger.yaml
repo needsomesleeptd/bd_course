@@ -1,0 +1,479 @@
+basePath: /
+definitions:
+  annot_handler.RequestAddAnnot:
+    properties:
+      class_label:
+        type: integer
+      error_bb:
+        items:
+          type: number
+        type: array
+    type: object
+  annot_handler.RequestUpdate:
+    properties:
+      class_label:
+        type: integer
+      error_bb:
+        items:
+          type: number
+        type: array
+      id:
+        type: integer
+      is_valid:
+        type: boolean
+      type_label:
+        type: integer
+    type: object
+  annot_handler.ResponseGetAnnot:
+    properties:
+      class_label:
+        type: integer
+      creator_id:
+        type: integer
+      error:
+        type: string
+      error_bb:
+        items:
+          type: number
+        type: array
+      id:
+        type: integer
+      isValid:
+        type: boolean
+      page_data:
+        items:
+          type: integer
+        type: array
+      status:
+        type: string
+      type_label:
+        type: integer
+      was_checked:
+        type: boolean
+    type: object
+  annot_handler.ResponseGetAnnots:
+    properties:
+      error:
+        type: string
+      markups:
+        items:
+          $ref: '#/definitions/models_dto.Markup'
+        type: array
+      status:
+        type: string
+    type: object
+  annot_type_handler.ResponseGetByID:
+    properties:
+      class_name:
+        type: string
+      creator_id:
+        type: integer
+      description:
+        type: string
+      error:
+        type: string
+      id:
+        type: integer
+      status:
+        type: string
+    type: object
+  auth_handler.RequestSignIn:
+    properties:
+      login:
+        type: string
+      password:
+        type: string
+    type: object
+  auth_handler.RequestSignUp:
+    properties:
+      user:
+        $ref: '#/definitions/models_dto.User'
+    type: object
+  auth_handler.ResponseSignIn:
+    properties:
+      jwt:
+        type: string
+      response:
+        $ref: '#/definitions/response.Response'
+    type: object
+  document_handler.RequestPassed:
+    properties:
+      ID:
+        type: string
+      has_passed:
+        type: boolean
+    type: object
+  document_handler.ResponseGettingMetaData:
+    properties:
+      documents_metadata:
+        items:
+          $ref: '#/definitions/models.DocumentMetaData'
+        type: array
+      response:
+        $ref: '#/definitions/response.Response'
+    type: object
+  models.DocumentMetaData:
+    properties:
+      creationTime:
+        type: string
+      creatorID:
+        type: integer
+      documentName:
+        type: string
+      hasPassed:
+        type: boolean
+      id:
+        type: string
+      pageCount:
+        type: integer
+    type: object
+  models.Role:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-comments:
+      Sender: Role check depends on the order
+    x-enum-varnames:
+    - Sender
+    - Controller
+    - Admin
+  models_dto.Markup:
+    properties:
+      class_label:
+        type: integer
+      creator_id:
+        type: integer
+      error_bb:
+        items:
+          type: number
+        type: array
+      id:
+        type: integer
+      isValid:
+        type: boolean
+      page_data:
+        items:
+          type: integer
+        type: array
+      type_label:
+        type: integer
+      was_checked:
+        type: boolean
+    type: object
+  models_dto.User:
+    properties:
+      group:
+        description: in case it is a controller it will have work group, in case of
+          user, his group
+        type: string
+      id:
+        type: integer
+      login:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      role:
+        $ref: '#/definitions/models.Role'
+      surname:
+        type: string
+    type: object
+  response.Response:
+    properties:
+      error:
+        type: string
+      status:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: ggwpezsmth
+    name: Andrew
+    url: http://www.swagger.io/support
+  description: An App for storing, getting annots and auto checking documents.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Annoter
+  version: "1.0"
+paths:
+  /annot/check:
+    post:
+      consumes:
+      - application/json
+      description: Updating chosed markup and marking it as checked as well as setting
+        creator_id to the current logged user
+      parameters:
+      - description: data to fix broken markup
+        in: body
+        name: NewMarkupParams
+        required: true
+        schema:
+          $ref: '#/definitions/annot_handler.RequestUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Modifies markup and marks it as checked
+      tags:
+      - Annotations
+  /annot/creatorID:
+    get:
+      consumes:
+      - application/json
+      description: Get the specific annotation by ID
+      parameters:
+      - description: Annotation ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Annotation not found
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get a specific annotation
+      tags:
+      - Annotations
+  /annot/get:
+    get:
+      consumes:
+      - application/json
+      description: Get the specific annotation by ID
+      parameters:
+      - description: Annotation ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Annotation not found
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get a specific annotation
+      tags:
+      - Annotations
+  /annot/getsAll:
+    get:
+      consumes:
+      - application/json
+      description: Getting all anottattions from a database, works only when there
+        are not a lot of annotattions has no paging
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Getting all anottattions from a database
+      tags:
+      - Annotations
+  /annotations/add:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Adds an annotation to a specific document
+      parameters:
+      - description: PNG image to add
+        in: formData
+        name: annotFile
+        required: true
+        type: file
+      - description: Annotation parameters (bboxes and class)
+        in: body
+        name: annotParams
+        required: true
+        schema:
+          $ref: '#/definitions/annot_handler.RequestAddAnnot'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Add an annotation
+      tags:
+      - Annotation
+  /document/getDocumentByID:
+    get:
+      consumes:
+      - application/json
+      description: Fetches a document file without metadata by its ID
+      parameters:
+      - description: Document ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/pdf
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get document by ID
+      tags:
+      - Document
+  /document/getDocumentsMeta:
+    get:
+      consumes:
+      - application/json
+      description: Gets all document metadata which was created by this user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get document meta data
+      tags:
+      - Document
+  /document/getReportByID:
+    get:
+      consumes:
+      - application/json
+      description: Fetches a report file without metadata by its ID
+      parameters:
+      - description: Document ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/pdf
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get report by ID
+      tags:
+      - Document
+  /document/makeDecision:
+    post:
+      consumes:
+      - application/json
+      description: Set's a field of the document has passed to true
+      parameters:
+      - description: id and bool value of whether the lab was merged
+        in: body
+        name: HasPassedParams
+        required: true
+        schema:
+          $ref: '#/definitions/document_handler.RequestPassed'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Mark a document to pass by normocontroller (requires a role to be a
+        normocontroller)
+      tags:
+      - Document
+  /document/report:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Gets a document, saves it with metadata on the system, then creates
+        a report,
+      parameters:
+      - description: Document file to report
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/pdf
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create an error report by given document
+      tags:
+      - Document
+  /user/SignIn:
+    post:
+      consumes:
+      - application/json
+      description: Allows an existing user to sign in using their login and password
+      parameters:
+      - description: Login and password details
+        in: body
+        name: SignInParams
+        required: true
+        schema:
+          $ref: '#/definitions/auth_handler.RequestSignIn'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth_handler.ResponseSignIn'
+      summary: SignIn an existing user
+      tags:
+      - Auth
+  /user/SignUp:
+    post:
+      consumes:
+      - application/json
+      description: creates a new user with given login and password
+      parameters:
+      - description: User login and password details
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/auth_handler.RequestSignUp'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: SignUp as a user
+      tags:
+      - Auth
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

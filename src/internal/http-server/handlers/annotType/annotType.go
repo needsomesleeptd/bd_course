@@ -72,6 +72,15 @@ func AddAnnotType(annoTypeSevice service.IAnotattionTypeService) http.HandlerFun
 	}
 }
 
+// @Summary Get a specific annotation
+// @Description Get the specific annotation by ID
+// @Tags Annotations
+// @Accept json
+// @Produce json
+// @Param id path string true "Annotation ID"
+// @Success 200 {object} ResponseGetByID
+// @Failure 200 {object} response.Response "Annotation not found"
+// @Router /annot/get [get]
 func GetAnnotType(annoTypeSevice service.IAnotattionTypeService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req RequestID
@@ -114,6 +123,15 @@ func GetAnnotTypesByIDs(annoTypeSevice service.IAnotattionTypeService) http.Hand
 	}
 }
 
+// @Summary Get a specific annotation
+// @Description Get the specific annotation by ID
+// @Tags Annotations
+// @Accept json
+// @Produce json
+// @Param id path string true "Annotation ID"
+// @Success 200 {object} ResponseGetByID
+// @Failure 200 {object} response.Response "Annotation not found"
+// @Router /annot/creatorID [get]
 func GetAnnotTypesByCreatorID(annoTypeSevice service.IAnotattionTypeService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, ok := r.Context().Value(auth_middleware.UserIDContextKey).(uint64)

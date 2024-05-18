@@ -56,6 +56,17 @@ type ResponseGetAnnots struct {
 	Markups []models_dto.Markup
 }
 
+// @Summary Add an annotation
+// @Description Adds an annotation to a specific document
+// @Tags Annotation
+// @Security ApiKeyAuth
+// @Accept mpfd
+// @Produce json
+// @Param annotFile formData file true "PNG image to add"
+// @Param annotParams body RequestAddAnnot true "Annotation parameters (bboxes and class)"
+// @Success 200 {object} response.Response "OK"
+// @Failure 200 {object} response.Response
+// @Router /annotations/add [post]
 func AddAnnot(annotService service.IAnotattionService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req RequestAddAnnot
@@ -96,6 +107,15 @@ func AddAnnot(annotService service.IAnotattionService) http.HandlerFunc {
 
 }
 
+// @Summary Get a specific annotation
+// @Description Get the specific annotation by ID
+// @Tags Annotations
+// @Accept json
+// @Produce json
+// @Param id path string true "The ID of the annotation to get"
+// @Success 200 {object} ResponseGetAnnot
+// @Failure 404 {object} response.Response
+// @Router /annot/get [get]
 func GetAnnot(annotService service.IAnotattionService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req RequestID
@@ -115,6 +135,14 @@ func GetAnnot(annotService service.IAnotattionService) http.HandlerFunc {
 	}
 }
 
+// @Summary Getting all anottattions from a database
+// @Description Getting all anottattions from a database, works only when there are not a lot of annotattions has no paging
+// @Tags Annotations
+// @Accept json
+// @Produce json
+// @Success 200 {object} ResponseGetAnnots
+// @Failure 200 {object} response.Response
+// @Router /annot/getsAll [get]
 func GetAllAnnots(annotService service.IAnotattionService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		markUps, err := annotService.GetAllAnottations()
@@ -127,6 +155,14 @@ func GetAllAnnots(annotService service.IAnotattionService) http.HandlerFunc {
 	}
 }
 
+// @Summary Getting all anotattions created by a user
+// @Description Getting all anottattions from a database, which were created by currently logged user
+// @Tags Annotations
+// @Accept json
+// @Produce json
+// @Success 200 {object} ResponseGetAnnots
+// @Failure 200 {object} response.Response
+// @Router /annot/creatorID [get]
 func GetAnnotsByUserID(annotService service.IAnotattionService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
@@ -164,6 +200,15 @@ func DeleteAnnot(annotService service.IAnotattionService) http.HandlerFunc {
 	}
 }
 
+// @Summary Modifies markup and marks it as checked
+// @Description Updating chosed markup and marking it as checked as well as setting creator_id to the current logged user
+// @Tags Annotations
+// @Accept json
+// @Produce json
+// @Param NewMarkupParams body RequestUpdate true "data to fix broken markup"
+// @Success 200 {object} response.Response
+// @Failure 200 {object} response.Response
+// @Router /annot/check [post]
 func Check(annotService service.IAnotattionService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req RequestUpdate

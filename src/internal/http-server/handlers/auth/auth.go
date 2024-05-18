@@ -33,6 +33,15 @@ type ResponseSignIn struct {
 	Jwt      string `json:"jwt,omitempty"`
 }
 
+// @Summary SignUp as a user
+// @Description creates a new user with given login and password
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param user body RequestSignUp true "User login and password details"
+// @Success 200 {object} response.Response "OK"
+// @Failure 200 {object} response.Response
+// @Router /user/SignUp [post]
 func SignUp(authService auth_service.IAuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req RequestSignUp
@@ -53,6 +62,15 @@ func SignUp(authService auth_service.IAuthService) http.HandlerFunc {
 	}
 }
 
+// @Summary SignIn an existing user
+// @Description Allows an existing user to sign in using their login and password
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param SignInParams body RequestSignIn true "Login and password details"
+// @Success 200 {object} ResponseSignIn "OK"
+// @Failure 200 {object} ResponseSignIn
+// @Router /user/SignIn [post]
 func SignIn(authService auth_service.IAuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req RequestSignIn

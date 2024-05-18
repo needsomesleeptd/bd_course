@@ -113,6 +113,16 @@ func writeBytesIntoResponse(w http.ResponseWriter, data []byte) error {
 
 }
 
+// @Summary Get document by ID
+// @Description Fetches a document file without metadata by its ID
+// @Security ApiKeyAuth
+// @Tags Document
+// @Accept json
+// @Produce application/pdf,json
+// @Param id path string true "Document ID"
+// @Success 200 {object} []byte
+// @Failure 200 {object} response.Response
+// @Router /document/getDocumentByID [get]
 func (h *Documenthandler) GetDocumentByID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req RequestID
@@ -138,6 +148,16 @@ func (h *Documenthandler) GetDocumentByID() http.HandlerFunc {
 	}
 }
 
+// @Summary Get report by ID
+// @Description Fetches a report file without metadata by its ID
+// @Security ApiKeyAuth
+// @Tags Document
+// @Accept json
+// @Produce application/pdf,json
+// @Param id path string true "Document ID"
+// @Success 200 {object} []byte
+// @Failure 200 {object} response.Response
+// @Router /document/getReportByID [get]
 func (h *Documenthandler) GetReportByID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req RequestID
@@ -153,6 +173,7 @@ func (h *Documenthandler) GetReportByID() http.HandlerFunc {
 			h.logger.Error(err.Error())
 			return
 		}
+
 		err = writeBytesIntoResponse(w, report.ReportData)
 		if err != nil {
 			render.JSON(w, r, response.Error(ErrSendingFile.Error()))
@@ -163,6 +184,15 @@ func (h *Documenthandler) GetReportByID() http.HandlerFunc {
 	}
 }
 
+// @Summary Get document meta data
+// @Description Gets all document metadata which was created by this user
+// @Security ApiKeyAuth
+// @Tags Document
+// @Accept json
+// @Produce json
+// @Success 200 {object} ResponseGettingMetaData
+// @Failure 200 {object} response.Response
+// @Router /document/getDocumentsMeta [get]
 func (h *Documenthandler) GetDocumentsMetaData() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := r.Context().Value(auth_middleware.UserIDContextKey).(uint64)
@@ -177,6 +207,17 @@ func (h *Documenthandler) GetDocumentsMetaData() http.HandlerFunc {
 	}
 }
 
+// @Summary Create an error report by given document
+// @Description Gets a document, saves it with metadata on the system, then creates a report,
+// saves it in the system and gives it back to the sender
+// @Security ApiKeyAuth
+// @Tags Document
+// @Accept mpfd
+// @Produce application/pdf,json
+// @Param file formData file true "Document file to report"   // Form parameter 'file' for sending the document
+// @Success 200 {object} []byte
+// @Failure 200 {object} response.Response
+// @Router /document/report [post]
 func (h *Documenthandler) CreateReport() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := r.Context().Value(auth_middleware.UserIDContextKey).(uint64)
@@ -242,6 +283,16 @@ func (h *Documenthandler) CreateReport() http.HandlerFunc {
 	}
 }
 
+// @Summary Mark a document to pass by normocontroller (requires a role to be a normocontroller)
+// @Description Set's a field of the document has passed to true
+// @Security ApiKeyAuth
+// @Tags Document
+// @Accept json
+// @Produce json
+// @Param HasPassedParams body RequestPassed true "id and bool value of whether the lab was merged"
+// @Success 200 {object} response.Response
+// @Failure 200 {object} response.Response
+// @Router /document/makeDecision [post]
 func (h *Documenthandler) MakeDecisionPassed() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req RequestPassed
@@ -249,12 +300,14 @@ func (h *Documenthandler) MakeDecisionPassed() http.HandlerFunc {
 		err := render.DecodeJSON(r.Body, &req)
 		if err != nil {
 			render.JSON(w, r, response.Error(models.ErrDecodingRequest.Error())) //TODO:: add logging here
+			h.logger.Error(err.Error())
 			return
 		}
 		document := models.DocumentMetaData{HasPassed: req.HasPassed}
 		err = h.docService.UpdateDocumentData(req.ID, document)
 		if err != nil {
 			render.JSON(w, r, response.Error(models.GetUserError(err).Error()))
+			h.logger.Error(err.Error())
 			return
 		}
 		render.JSON(w, r, response.OK())

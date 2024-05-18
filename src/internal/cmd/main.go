@@ -35,9 +35,12 @@ import (
 	"syscall"
 	"time"
 
+	_ "annotater/internal/docs"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/redis/go-redis/v9"
+	httpSwagger "github.com/swaggo/http-swagger/v2"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -84,6 +87,24 @@ func setuplog() *slog.Logger {
 	return log
 }
 
+// @title Annoter
+// @version 1.0
+// @description An App for storing, getting annots and auto checking documents.
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name Andrew
+// @contact.url http://www.swagger.io/support
+// @contact.email ggwpezsmth
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8080
+// @BasePath /
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 func main() {
 	db, err := gorm.Open(postgres.New(POSTGRES_CFG), &gorm.Config{TranslateError: true})
 	log := setuplog()
@@ -183,8 +204,14 @@ func main() {
 	router.Group(func(r chi.Router) { // group for which auth middleware is required
 		r.Use(authMiddleware)
 
-		// Document
 		r.Route("/document", func(r chi.Router) {
+			// @Summary Create a report
+			// @Description Create a new report based on the input data
+			// @Tags reports
+			// @Accept json
+			// @Produce json
+			// @Success 200 {object} Report
+			// @Router /document/report [post]
 			r.Post("/report", documentHandler.CreateReport())
 			r.Get("/getDocument", documentHandler.GetDocumentByID())
 			r.Get("/getReport", documentHandler.GetReportByID())
@@ -236,6 +263,9 @@ func main() {
 	//auth, no middleware is required
 	router.Post("/user/SignUp", auth_handler.SignUp(authService))
 	router.Post("/user/SignIn", auth_handler.SignIn(authService))
+	router.Get("/swagger/*", httpSwagger.Handler(
+		httpSwagger.URL("http://localhost:8080/swagger/doc.json"), //The url pointing to API definition
+	))
 
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
@@ -250,7 +280,7 @@ func main() {
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil {
-			fmt.Println("error with server")
+			fmt.Printf("error with server %s", err.Error())
 		}
 	}()
 

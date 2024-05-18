@@ -1,0 +1,732 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "An App for storing, getting annots and auto checking documents.",
+        "title": "Annoter",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "Andrew",
+            "url": "http://www.swagger.io/support",
+            "email": "ggwpezsmth"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/annot/check": {
+            "post": {
+                "description": "Updating chosed markup and marking it as checked as well as setting creator_id to the current logged user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Annotations"
+                ],
+                "summary": "Modifies markup and marks it as checked",
+                "parameters": [
+                    {
+                        "description": "data to fix broken markup",
+                        "name": "NewMarkupParams",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/annot_handler.RequestUpdate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/annot/creatorID": {
+            "get": {
+                "description": "Get the specific annotation by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Annotations"
+                ],
+                "summary": "Get a specific annotation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Annotation ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Annotation not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/annot/get": {
+            "get": {
+                "description": "Get the specific annotation by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Annotations"
+                ],
+                "summary": "Get a specific annotation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Annotation ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Annotation not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/annot/getsAll": {
+            "get": {
+                "description": "Getting all anottattions from a database, works only when there are not a lot of annotattions has no paging",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Annotations"
+                ],
+                "summary": "Getting all anottattions from a database",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/annotations/add": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Adds an annotation to a specific document",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Annotation"
+                ],
+                "summary": "Add an annotation",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "PNG image to add",
+                        "name": "annotFile",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "description": "Annotation parameters (bboxes and class)",
+                        "name": "annotParams",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/annot_handler.RequestAddAnnot"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/document/getDocumentByID": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Fetches a document file without metadata by its ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/pdf",
+                    "application/json"
+                ],
+                "tags": [
+                    "Document"
+                ],
+                "summary": "Get document by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Document ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/document/getDocumentsMeta": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Gets all document metadata which was created by this user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Document"
+                ],
+                "summary": "Get document meta data",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/document/getReportByID": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Fetches a report file without metadata by its ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/pdf",
+                    "application/json"
+                ],
+                "tags": [
+                    "Document"
+                ],
+                "summary": "Get report by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Document ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/document/makeDecision": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Set's a field of the document has passed to true",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Document"
+                ],
+                "summary": "Mark a document to pass by normocontroller (requires a role to be a normocontroller)",
+                "parameters": [
+                    {
+                        "description": "id and bool value of whether the lab was merged",
+                        "name": "HasPassedParams",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/document_handler.RequestPassed"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/document/report": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Gets a document, saves it with metadata on the system, then creates a report,",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/pdf",
+                    "application/json"
+                ],
+                "tags": [
+                    "Document"
+                ],
+                "summary": "Create an error report by given document",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "Document file to report",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/SignIn": {
+            "post": {
+                "description": "Allows an existing user to sign in using their login and password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "SignIn an existing user",
+                "parameters": [
+                    {
+                        "description": "Login and password details",
+                        "name": "SignInParams",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth_handler.RequestSignIn"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/auth_handler.ResponseSignIn"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/SignUp": {
+            "post": {
+                "description": "creates a new user with given login and password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "SignUp as a user",
+                "parameters": [
+                    {
+                        "description": "User login and password details",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth_handler.RequestSignUp"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "annot_handler.RequestAddAnnot": {
+            "type": "object",
+            "properties": {
+                "class_label": {
+                    "type": "integer"
+                },
+                "error_bb": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                }
+            }
+        },
+        "annot_handler.RequestUpdate": {
+            "type": "object",
+            "properties": {
+                "class_label": {
+                    "type": "integer"
+                },
+                "error_bb": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_valid": {
+                    "type": "boolean"
+                },
+                "type_label": {
+                    "type": "integer"
+                }
+            }
+        },
+        "annot_handler.ResponseGetAnnot": {
+            "type": "object",
+            "properties": {
+                "class_label": {
+                    "type": "integer"
+                },
+                "creator_id": {
+                    "type": "integer"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "error_bb": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isValid": {
+                    "type": "boolean"
+                },
+                "page_data": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "status": {
+                    "type": "string"
+                },
+                "type_label": {
+                    "type": "integer"
+                },
+                "was_checked": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "annot_handler.ResponseGetAnnots": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "markups": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models_dto.Markup"
+                    }
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "annot_type_handler.ResponseGetByID": {
+            "type": "object",
+            "properties": {
+                "class_name": {
+                    "type": "string"
+                },
+                "creator_id": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth_handler.RequestSignIn": {
+            "type": "object",
+            "properties": {
+                "login": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth_handler.RequestSignUp": {
+            "type": "object",
+            "properties": {
+                "user": {
+                    "$ref": "#/definitions/models_dto.User"
+                }
+            }
+        },
+        "auth_handler.ResponseSignIn": {
+            "type": "object",
+            "properties": {
+                "jwt": {
+                    "type": "string"
+                },
+                "response": {
+                    "$ref": "#/definitions/response.Response"
+                }
+            }
+        },
+        "document_handler.RequestPassed": {
+            "type": "object",
+            "properties": {
+                "ID": {
+                    "type": "string"
+                },
+                "has_passed": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "document_handler.ResponseGettingMetaData": {
+            "type": "object",
+            "properties": {
+                "documents_metadata": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.DocumentMetaData"
+                    }
+                },
+                "response": {
+                    "$ref": "#/definitions/response.Response"
+                }
+            }
+        },
+        "models.DocumentMetaData": {
+            "type": "object",
+            "properties": {
+                "creationTime": {
+                    "type": "string"
+                },
+                "creatorID": {
+                    "type": "integer"
+                },
+                "documentName": {
+                    "type": "string"
+                },
+                "hasPassed": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "pageCount": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.Role": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2
+            ],
+            "x-enum-comments": {
+                "Sender": "Role check depends on the order"
+            },
+            "x-enum-varnames": [
+                "Sender",
+                "Controller",
+                "Admin"
+            ]
+        },
+        "models_dto.Markup": {
+            "type": "object",
+            "properties": {
+                "class_label": {
+                    "type": "integer"
+                },
+                "creator_id": {
+                    "type": "integer"
+                },
+                "error_bb": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isValid": {
+                    "type": "boolean"
+                },
+                "page_data": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "type_label": {
+                    "type": "integer"
+                },
+                "was_checked": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "models_dto.User": {
+            "type": "object",
+            "properties": {
+                "group": {
+                    "description": "in case it is a controller it will have work group, in case of user, his group",
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "login": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "role": {
+                    "$ref": "#/definitions/models.Role"
+                },
+                "surname": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.Response": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}
