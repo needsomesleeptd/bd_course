@@ -2,7 +2,8 @@ package report_creator
 
 import (
 	"annotater/internal/models"
-	bboxes_utils "annotater/tech_ui/utils/bboxes"
+	bboxes_utils "annotater/internal/pkg/bboxesUtils"
+
 	"bytes"
 	"errors"
 	"fmt"

@@ -68,23 +68,23 @@ func (repo *AnotattionRepositoryAdapter) DeleteAnotattion(id uint64) error { // 
 
 func (repo *AnotattionRepositoryAdapter) GetAnottationByID(id uint64) (*models.Markup, error) {
 	var markUpDA models_da.Markup
-	//strID := strconv.FormatUint(id, 10)
-	//if err := repo.cache.Get(strID, &markUpDA); err != nil {
+	strID := strconv.FormatUint(id, 10)
+	if err := repo.cache.Get(strID, &markUpDA); err != nil {
 
-	tx := repo.db.Where("id = ?", id).First(&markUpDA)
+		tx := repo.db.Where("id = ?", id).First(&markUpDA)
 
-	if tx.Error == gorm.ErrRecordNotFound {
-		return nil, models.ErrNotFound
+		if tx.Error == gorm.ErrRecordNotFound {
+			return nil, models.ErrNotFound
+		}
+
+		if tx.Error != nil {
+			return nil, errors.Wrap(tx.Error, "Error in getting anotattion type")
+		}
 	}
-
-	if tx.Error != nil {
-		return nil, errors.Wrap(tx.Error, "Error in getting anotattion type")
+	err := repo.cache.Set(strID, &markUpDA)
+	if err != nil {
+		return nil, err
 	}
-	//	}
-	/*	err := repo.cache.Set(strID, &markUpDA)
-		if err != nil {
-			return nil, err
-		}*/
 
 	markUpType, err := models_da.FromDaMarkup(&markUpDA)
 	if err != nil {
