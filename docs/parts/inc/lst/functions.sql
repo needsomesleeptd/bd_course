@@ -1,4 +1,4 @@
-CREATE  OR REPLACE FUNCTION getTasksReady()
+CREATE  OR REPLACE FUNCTION getTasksReady(task_status int)
 RETURNS TABLE (
     id int,
     doc_id uuid,
@@ -7,11 +7,15 @@ RETURNS TABLE (
 AS $$
 #variable_conflict use_column
 BEGIN
-    RETURN QUERY
-    SELECT dq.id, dq.doc_id, dq.status
-    FROM document_queues as dq
-    WHERE status = 0;
+    if (task_status IS NULL) then 
+        RETURN QUERY
+        SELECT dq.id, dq.doc_id, dq.status
+        FROM document_queues as dq;
+    else
+        RETURN QUERY
+        SELECT dq.id, dq.doc_id, dq.status
+        FROM document_queues as dq
+        WHERE status = task_status;
+    end if;
 END;
 $$ LANGUAGE plpgsql;
-
-select * from getTasksReady();
