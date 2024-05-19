@@ -34,7 +34,7 @@ type ResponseSignIn struct {
 }
 
 // @Summary SignUp as a user
-// @Description creates a new user with given login and password
+// @Description creates a new user with given login and password the role on creation is sender
 // @Tags Auth
 // @Accept json
 // @Produce json

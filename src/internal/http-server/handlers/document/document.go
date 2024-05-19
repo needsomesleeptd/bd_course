@@ -119,10 +119,10 @@ func writeBytesIntoResponse(w http.ResponseWriter, data []byte) error {
 // @Tags Document
 // @Accept json
 // @Produce application/pdf,json
-// @Param id path string true "Document ID"
+// @Param Document body RequestID true  "Document ID"
 // @Success 200 {object} []byte
 // @Failure 200 {object} response.Response
-// @Router /document/getDocumentByID [get]
+// @Router /document/getDocument [post]
 func (h *Documenthandler) GetDocumentByID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req RequestID
@@ -154,10 +154,10 @@ func (h *Documenthandler) GetDocumentByID() http.HandlerFunc {
 // @Tags Document
 // @Accept json
 // @Produce application/pdf,json
-// @Param id path string true "Document ID"
+// @Param ReportID body RequestID true  "Report ID"
 // @Success 200 {object} []byte
 // @Failure 200 {object} response.Response
-// @Router /document/getReportByID [get]
+// @Router /document/getReport [post]
 func (h *Documenthandler) GetReportByID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req RequestID

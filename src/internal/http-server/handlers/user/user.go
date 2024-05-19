@@ -40,6 +40,17 @@ func NewDocumentHandler(logSrc *slog.Logger, serv service.IUserService) UserHand
 	}
 }
 
+// @Summary Change user role (available if admin)
+// @Description Set user role, only available if you are admin
+// 0 -- sender, 1 --controller, 2-- admin
+// @Tags Users
+// @Security ApiKeyAuth
+// @Accept json
+// @Produce json
+// @Param ChangeUserRoleParams body RequestChangeRole true "data to get the user and change his role"
+// @Success 200 {object} response.Response
+// @Failure 200 {object} response.Response "Annotation not found"
+// @Router /user/role [post]
 func (h *UserHandler) ChangeUserPerms() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req RequestChangeRole
@@ -59,6 +70,16 @@ func (h *UserHandler) ChangeUserPerms() http.HandlerFunc {
 	}
 }
 
+// @Summary Get all users data (available if admin)
+// @Description Get all users parametersm available if you are admin
+// roles description: 0 -- sender, 1 --controller, 2-- admin
+// @Tags Users
+// @Security ApiKeyAuth
+// @Accept json
+// @Produce json
+// @Success 200 {object} ResponseGetAllUsers
+// @Failure 200 {object} response.Response "some internal user errror"
+// @Router /user/getUsers [get]
 func (h *UserHandler) GetAllUsers() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 

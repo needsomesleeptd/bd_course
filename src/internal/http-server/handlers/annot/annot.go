@@ -63,10 +63,10 @@ type ResponseGetAnnots struct {
 // @Accept mpfd
 // @Produce json
 // @Param annotFile formData file true "PNG image to add"
-// @Param annotParams body RequestAddAnnot true "Annotation parameters (bboxes and class)"
+// @Param jsonBbs formData RequestAddAnnot true "Annotation parameters (bboxes and class)"
 // @Success 200 {object} response.Response "OK"
 // @Failure 200 {object} response.Response
-// @Router /annotations/add [post]
+// @Router /annot/add [post]
 func AddAnnot(annotService service.IAnotattionService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req RequestAddAnnot
@@ -81,6 +81,7 @@ func AddAnnot(annotService service.IAnotattionService) http.HandlerFunc {
 		pageData, err = io.ReadAll(file)
 		if err != nil {
 			render.JSON(w, r, response.Error(models.GetUserError(err).Error())) //TODO:: add logging here
+			fmt.Print(err.Error())
 			return
 		}
 		bbsString := r.FormValue(JsonBbsFieldName)
@@ -88,6 +89,7 @@ func AddAnnot(annotService service.IAnotattionService) http.HandlerFunc {
 		err = json.Unmarshal([]byte(bbsString), &req)
 		if err != nil {
 			render.JSON(w, r, response.Error(models.GetUserError(err).Error())) //TODO:: add logging here
+			fmt.Print(err.Error())
 			return
 		}
 		annot := models.Markup{
@@ -109,13 +111,14 @@ func AddAnnot(annotService service.IAnotattionService) http.HandlerFunc {
 
 // @Summary Get a specific annotation
 // @Description Get the specific annotation by ID
-// @Tags Annotations
+// @Tags Annotation
+// @Security ApiKeyAuth
 // @Accept json
 // @Produce json
-// @Param id path string true "The ID of the annotation to get"
+// @Param AnnotID body RequestID true  "Annot ID"
 // @Success 200 {object} ResponseGetAnnot
 // @Failure 404 {object} response.Response
-// @Router /annot/get [get]
+// @Router /annot/get [post]
 func GetAnnot(annotService service.IAnotattionService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req RequestID
@@ -137,7 +140,8 @@ func GetAnnot(annotService service.IAnotattionService) http.HandlerFunc {
 
 // @Summary Getting all anottattions from a database
 // @Description Getting all anottattions from a database, works only when there are not a lot of annotattions has no paging
-// @Tags Annotations
+// @Tags Annotation
+// @Security ApiKeyAuth
 // @Accept json
 // @Produce json
 // @Success 200 {object} ResponseGetAnnots
@@ -157,7 +161,8 @@ func GetAllAnnots(annotService service.IAnotattionService) http.HandlerFunc {
 
 // @Summary Getting all anotattions created by a user
 // @Description Getting all anottattions from a database, which were created by currently logged user
-// @Tags Annotations
+// @Tags Annotation
+// @Security ApiKeyAuth
 // @Accept json
 // @Produce json
 // @Success 200 {object} ResponseGetAnnots
@@ -202,7 +207,8 @@ func DeleteAnnot(annotService service.IAnotattionService) http.HandlerFunc {
 
 // @Summary Modifies markup and marks it as checked
 // @Description Updating chosed markup and marking it as checked as well as setting creator_id to the current logged user
-// @Tags Annotations
+// @Tags Annotation
+// @Security ApiKeyAuth
 // @Accept json
 // @Produce json
 // @Param NewMarkupParams body RequestUpdate true "data to fix broken markup"

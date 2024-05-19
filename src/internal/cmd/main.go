@@ -205,16 +205,9 @@ func main() {
 		r.Use(authMiddleware)
 
 		r.Route("/document", func(r chi.Router) {
-			// @Summary Create a report
-			// @Description Create a new report based on the input data
-			// @Tags reports
-			// @Accept json
-			// @Produce json
-			// @Success 200 {object} Report
-			// @Router /document/report [post]
 			r.Post("/report", documentHandler.CreateReport())
-			r.Get("/getDocument", documentHandler.GetDocumentByID())
-			r.Get("/getReport", documentHandler.GetReportByID())
+			r.Post("/getDocument", documentHandler.GetDocumentByID())
+			r.Post("/getReport", documentHandler.GetReportByID())
 			r.Get("/getDocumentsMeta", documentHandler.GetDocumentsMetaData())
 			r.Post("/makeDecision", documentHandler.MakeDecisionPassed())
 		})
@@ -227,11 +220,10 @@ func main() {
 			adminOnlyAnnotTypes.Use(accesMiddleware.AdminOnlyMiddleware)
 
 			r.Post("/add", annot_type_handler.AddAnnotType(annotTypeService))
-			r.Get("/get", annot_type_handler.GetAnnotType(annotTypeService))
 
 			r.Get("/creatorID", annot_type_handler.GetAnnotTypesByCreatorID(annotTypeService))
 
-			r.Get("/gets", annot_type_handler.GetAnnotTypesByIDs(annotTypeService))
+			r.Post("/gets", annot_type_handler.GetAnnotTypesByIDs(annotTypeService))
 
 			adminOnlyAnnotTypes.Delete("/delete", annot_type_handler.DeleteAnnotType(annotTypeService))
 			r.Get("/getsAll", annot_type_handler.GetAllAnnotTypes(annotTypeService))
@@ -244,7 +236,7 @@ func main() {
 			//adminOnlyAnnots.Use(accesMiddleware.AdminOnlyMiddleware)
 
 			r.Post("/add", annot_handler.AddAnnot(annotService))
-			r.Get("/get", annot_handler.GetAnnot(annotService))
+			r.Post("/get", annot_handler.GetAnnot(annotService))
 			r.Get("/creatorID", annot_handler.GetAnnotsByUserID(annotService))
 
 			r.Delete("/delete", annot_handler.DeleteAnnot(annotService))

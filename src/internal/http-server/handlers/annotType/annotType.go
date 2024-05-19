@@ -43,6 +43,16 @@ type ResponseGetTypes struct {
 	MarkupTypes []models_dto.MarkupType `json:"markupTypes"`
 }
 
+// @Summary Add new anotattion type
+// @Description Create and save the new anotattion type, as created by signed in user
+// @Tags Annotation types
+// @Security ApiKeyAuth
+// @Accept json
+// @Produce json
+// @Param NewAnnotTypeParams body RequestAnnotType true "data for inserting new annotType"
+// @Success 200 {object} response.Response
+// @Failure 200 {object} response.Response "Annotation type not found"
+// @Router /annotType/add [post]
 func AddAnnotType(annoTypeSevice service.IAnotattionTypeService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req RequestAnnotType
@@ -72,15 +82,17 @@ func AddAnnotType(annoTypeSevice service.IAnotattionTypeService) http.HandlerFun
 	}
 }
 
-// @Summary Get a specific annotation
-// @Description Get the specific annotation by ID
-// @Tags Annotations
-// @Accept json
-// @Produce json
-// @Param id path string true "Annotation ID"
-// @Success 200 {object} ResponseGetByID
-// @Failure 200 {object} response.Response "Annotation not found"
-// @Router /annot/get [get]
+// deprecated
+// Summary Get a specific annotation type
+// Description Get the specific annotation by ID
+// Tags Annotation types
+// Security ApiKeyAuth
+// Accept json
+// Produce json
+// Param GetAnnotTypeParams body RequestID true "id for getting new annotType"
+// Success 200 {object} ResponseGetByID
+// Failure 200 {object} response.Response "Annotation not found"
+// Router /annotType/get [get]
 func GetAnnotType(annoTypeSevice service.IAnotattionTypeService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req RequestID
@@ -100,6 +112,16 @@ func GetAnnotType(annoTypeSevice service.IAnotattionTypeService) http.HandlerFun
 	}
 }
 
+// @Summary Get numerous types by numerous IDs
+// @Description Extracts numerous types for a set of IDs
+// @Tags Annotation types
+// @Security ApiKeyAuth
+// @Accept json
+// @Produce json
+// @Param GetAnnotTypesIDs body RequestIDs true "data for getting numerous anotattions"
+// @Success 200 {object} ResponseGetByID
+// @Failure 200 {object} response.Response "Annotation not found"
+// @Router /annotType/gets [post]
 func GetAnnotTypesByIDs(annoTypeSevice service.IAnotattionTypeService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req RequestIDs
@@ -123,15 +145,15 @@ func GetAnnotTypesByIDs(annoTypeSevice service.IAnotattionTypeService) http.Hand
 	}
 }
 
-// @Summary Get a specific annotation
-// @Description Get the specific annotation by ID
-// @Tags Annotations
+// @Summary Get a annotation type of a signed in user
+// @Description Get all anotattions which were created by specific user
+// @Tags Annotation types
+// @Security ApiKeyAuth
 // @Accept json
 // @Produce json
-// @Param id path string true "Annotation ID"
-// @Success 200 {object} ResponseGetByID
-// @Failure 200 {object} response.Response "Annotation not found"
-// @Router /annot/creatorID [get]
+// @Success 200 {object} ResponseGetTypes
+// @Failure 200 {object} response.Response "Annotation type not found"
+// @Router /annotType/creatorID [get]
 func GetAnnotTypesByCreatorID(annoTypeSevice service.IAnotattionTypeService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, ok := r.Context().Value(auth_middleware.UserIDContextKey).(uint64)
@@ -154,6 +176,16 @@ func GetAnnotTypesByCreatorID(annoTypeSevice service.IAnotattionTypeService) htt
 	}
 }
 
+// @Summary Delete AnnotType By userID
+// @Description Delete an anotattion by specific ID
+// @Tags Annotation types
+// @Security ApiKeyAuth
+// @Accept json
+// @Produce json
+// @Param AnnotTypeID body RequestID true "ID for deleting an annot"
+// @Success 200 {object} response.Response
+// @Failure 200 {object} response.Response "Annotation type not found"
+// @Router /annotType/delete [delete]
 func DeleteAnnotType(annoTypeSevice service.IAnotattionTypeService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req RequestID
@@ -171,6 +203,15 @@ func DeleteAnnotType(annoTypeSevice service.IAnotattionTypeService) http.Handler
 	}
 }
 
+// @Summary Getting all available annot types
+// @Description get all available annot Types
+// @Tags Annotation types
+// @Security ApiKeyAuth
+// @Accept json
+// @Produce json
+// @Success 200 {object} response.Response
+// @Failure 200 {object} response.Response "Annotation type not found"
+// @Router /annotType/getsAll [get]
 func GetAllAnnotTypes(annoTypeSevice service.IAnotattionTypeService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 

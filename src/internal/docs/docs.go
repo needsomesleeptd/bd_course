@@ -24,128 +24,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/annot/check": {
-            "post": {
-                "description": "Updating chosed markup and marking it as checked as well as setting creator_id to the current logged user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Annotations"
-                ],
-                "summary": "Modifies markup and marks it as checked",
-                "parameters": [
-                    {
-                        "description": "data to fix broken markup",
-                        "name": "NewMarkupParams",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/annot_handler.RequestUpdate"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/annot/creatorID": {
-            "get": {
-                "description": "Get the specific annotation by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Annotations"
-                ],
-                "summary": "Get a specific annotation",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Annotation ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Annotation not found",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/annot/get": {
-            "get": {
-                "description": "Get the specific annotation by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Annotations"
-                ],
-                "summary": "Get a specific annotation",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Annotation ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Annotation not found",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/annot/getsAll": {
-            "get": {
-                "description": "Getting all anottattions from a database, works only when there are not a lot of annotattions has no paging",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Annotations"
-                ],
-                "summary": "Getting all anottattions from a database",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/annotations/add": {
+        "/annot/add": {
             "post": {
                 "security": [
                     {
@@ -172,12 +51,56 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Annotation parameters (bboxes and class)",
-                        "name": "annotParams",
+                        "type": "integer",
+                        "name": "class_label",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "collectionFormat": "csv",
+                        "name": "error_bb",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/annot/check": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Updating chosed markup and marking it as checked as well as setting creator_id to the current logged user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Annotation"
+                ],
+                "summary": "Modifies markup and marks it as checked",
+                "parameters": [
+                    {
+                        "description": "data to fix broken markup",
+                        "name": "NewMarkupParams",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/annot_handler.RequestAddAnnot"
+                            "$ref": "#/definitions/annot_handler.RequestUpdate"
                         }
                     }
                 ],
@@ -191,8 +114,282 @@ const docTemplate = `{
                 }
             }
         },
-        "/document/getDocumentByID": {
+        "/annot/creatorID": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Getting all anottattions from a database, which were created by currently logged user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Annotation"
+                ],
+                "summary": "Getting all anotattions created by a user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/annot/get": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get the specific annotation by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Annotation"
+                ],
+                "summary": "Get a specific annotation",
+                "parameters": [
+                    {
+                        "description": "Annot ID",
+                        "name": "AnnotID",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/annot_handler.RequestID"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/annot_handler.ResponseGetAnnot"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/annot/getsAll": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Getting all anottattions from a database, works only when there are not a lot of annotattions has no paging",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Annotation"
+                ],
+                "summary": "Getting all anottattions from a database",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/annotType/add": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Create and save the new anotattion type, as created by signed in user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Annotation types"
+                ],
+                "summary": "Add new anotattion type",
+                "parameters": [
+                    {
+                        "description": "data for inserting new annotType",
+                        "name": "NewAnnotTypeParams",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/annot_type_handler.RequestAnnotType"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Annotation type not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/annotType/creatorID": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all anotattions which were created by specific user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Annotation types"
+                ],
+                "summary": "Get a annotation type of a signed in user",
+                "responses": {
+                    "200": {
+                        "description": "Annotation type not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/annotType/delete": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete an anotattion by specific ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Annotation types"
+                ],
+                "summary": "Delete AnnotType By userID",
+                "parameters": [
+                    {
+                        "description": "ID for deleting an annot",
+                        "name": "AnnotTypeID",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/annot_type_handler.RequestID"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Annotation type not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/annotType/gets": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Extracts numerous types for a set of IDs",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Annotation types"
+                ],
+                "summary": "Get numerous types by numerous IDs",
+                "parameters": [
+                    {
+                        "description": "data for getting numerous anotattions",
+                        "name": "GetAnnotTypesIDs",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/annot_type_handler.RequestIDs"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Annotation not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/annotType/getsAll": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "get all available annot Types",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Annotation types"
+                ],
+                "summary": "Getting all available annot types",
+                "responses": {
+                    "200": {
+                        "description": "Annotation type not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/document/getDocument": {
+            "post": {
                 "security": [
                     {
                         "ApiKeyAuth": []
@@ -212,11 +409,13 @@ const docTemplate = `{
                 "summary": "Get document by ID",
                 "parameters": [
                     {
-                        "type": "string",
                         "description": "Document ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
+                        "name": "Document",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/document_handler.RequestID"
+                        }
                     }
                 ],
                 "responses": {
@@ -257,8 +456,8 @@ const docTemplate = `{
                 }
             }
         },
-        "/document/getReportByID": {
-            "get": {
+        "/document/getReport": {
+            "post": {
                 "security": [
                     {
                         "ApiKeyAuth": []
@@ -278,11 +477,13 @@ const docTemplate = `{
                 "summary": "Get report by ID",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Document ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
+                        "description": "Report ID",
+                        "name": "ReportID",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/document_handler.RequestID"
+                        }
                     }
                 ],
                 "responses": {
@@ -408,7 +609,7 @@ const docTemplate = `{
         },
         "/user/SignUp": {
             "post": {
-                "description": "creates a new user with given login and password",
+                "description": "creates a new user with given login and password the role on creation is sender",
                 "consumes": [
                     "application/json"
                 ],
@@ -439,20 +640,81 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/user/getUsers": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all users parametersm available if you are admin",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get all users data (available if admin)",
+                "responses": {
+                    "200": {
+                        "description": "some internal user errror",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/role": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Set user role, only available if you are admin",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Change user role (available if admin)",
+                "parameters": [
+                    {
+                        "description": "data to get the user and change his role",
+                        "name": "ChangeUserRoleParams",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user_handler.RequestChangeRole"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Annotation not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
-        "annot_handler.RequestAddAnnot": {
+        "annot_handler.RequestID": {
             "type": "object",
             "properties": {
-                "class_label": {
+                "id": {
                     "type": "integer"
-                },
-                "error_bb": {
-                    "type": "array",
-                    "items": {
-                        "type": "number"
-                    }
                 }
             }
         },
@@ -537,6 +799,39 @@ const docTemplate = `{
                 }
             }
         },
+        "annot_type_handler.RequestAnnotType": {
+            "type": "object",
+            "properties": {
+                "class_name": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "annot_type_handler.RequestID": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "annot_type_handler.RequestIDs": {
+            "type": "object",
+            "properties": {
+                "ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
         "annot_type_handler.ResponseGetByID": {
             "type": "object",
             "properties": {
@@ -554,6 +849,23 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "annot_type_handler.ResponseGetTypes": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "markupTypes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models_dto.MarkupType"
+                    }
                 },
                 "status": {
                     "type": "string"
@@ -587,6 +899,14 @@ const docTemplate = `{
                 },
                 "response": {
                     "$ref": "#/definitions/response.Response"
+                }
+            }
+        },
+        "document_handler.RequestID": {
+            "type": "object",
+            "properties": {
+                "ID": {
+                    "type": "string"
                 }
             }
         },
@@ -689,6 +1009,23 @@ const docTemplate = `{
                 }
             }
         },
+        "models_dto.MarkupType": {
+            "type": "object",
+            "properties": {
+                "class_name": {
+                    "type": "string"
+                },
+                "creator_id": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
         "models_dto.User": {
             "type": "object",
             "properties": {
@@ -724,6 +1061,34 @@ const docTemplate = `{
                 },
                 "status": {
                     "type": "string"
+                }
+            }
+        },
+        "user_handler.RequestChangeRole": {
+            "type": "object",
+            "properties": {
+                "login": {
+                    "type": "string"
+                },
+                "req_role": {
+                    "$ref": "#/definitions/models.Role"
+                }
+            }
+        },
+        "user_handler.ResponseGetAllUsers": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models_dto.User"
+                    }
                 }
             }
         }
