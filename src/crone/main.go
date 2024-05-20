@@ -13,12 +13,15 @@ import (
 	rep_creator_service "annotater/internal/bl/reportCreatorService"
 	report_creator "annotater/internal/bl/reportCreatorService/reportCreator"
 	models_da "annotater/internal/models/modelsDA"
+	cache_utils "annotater/internal/pkg/cacheUtils"
+	"context"
 	"fmt"
 	"os"
 	"time"
 
 	"github.com/go-co-op/gocron/v2"
 	"github.com/pkg/errors"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -32,6 +35,7 @@ var (
 	DOCUMENTS_PATH       = "../../../documents"
 	DOCUMENTS_EXT        = ".pdf"
 	REPORTS_EXT          = ".pdf"
+	SESSION_PATH         = "localhost:6379"
 )
 var (
 	db   *gorm.DB
@@ -42,7 +46,7 @@ var (
 func runTasks() error {
 	fmt.Println("Started running tasks")
 	var documentQueueDa []models_da.DocumentQueue
-	err := db.Raw("SELECT * FROM getTasksReady()").Scan(&documentQueueDa).Error
+	err := db.Raw("SELECT * FROM getTasksReady(0)").Scan(&documentQueueDa).Error
 	if len(documentQueueDa) == 0 {
 		return nil
 	}
@@ -79,6 +83,44 @@ func runTask(db *gorm.DB, doc *models_da.DocumentQueue, serv service.IDocumentSe
 
 func main() {
 	var err error
+	clientAnnotsCache := redis.NewClient(&redis.Options{
+		Addr:     SESSION_PATH,
+		Password: "",
+		DB:       1,
+	})
+	_, err = clientAnnotsCache.Ping(context.TODO()).Result()
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+
+	clientDocumentCache := redis.NewClient(&redis.Options{
+		Addr:     SESSION_PATH,
+		Password: "",
+		DB:       2,
+	})
+	_, err = clientDocumentCache.Ping(context.TODO()).Result()
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+
+	clientAnnotTypeCache := redis.NewClient(&redis.Options{
+		Addr:     SESSION_PATH,
+		Password: "",
+		DB:       2,
+	})
+	_, err = clientAnnotTypeCache.Ping(context.TODO()).Result()
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+
+	//cache
+	annotCache := cache_utils.NewReddisCache(clientAnnotsCache, context.TODO(), 1024, time.Hour)
+	documentCache := cache_utils.NewReddisCache(clientDocumentCache, context.TODO(), 1024, time.Hour)
+	annotTypeCache := cache_utils.NewReddisCache(clientAnnotTypeCache, context.TODO(), 1024, time.Hour)
+
 	db, err = gorm.Open(postgres.New(POSTGRES_CFG), &gorm.Config{TranslateError: true})
 	if err != nil {
 		fmt.Println(err.Error())
@@ -91,16 +133,16 @@ func main() {
 	}*/
 	modelhandler := nn_model_handler.NewHttpModelHandler(MODEL_ROUTE)
 	model := nn_adapter.NewDetectionModel(modelhandler)
-	annotTypeRepo := annot_type_repo_adapter.NewAnotattionTypeRepositoryAdapter(db)
+	annotTypeRepo := annot_type_repo_adapter.NewAnotattionTypeRepositoryAdapter(db, &annotTypeCache)
 	reportCreator := report_creator.NewPDFReportCreator(REPORTS_CREATOR_PATH)
-	annotRepo := repo_adapter.NewAnotattionRepositoryAdapter(db)
+	annotRepo := repo_adapter.NewAnotattionRepositoryAdapter(db, annotCache)
 	reportCreatorService := rep_creator_service.NewDocumentService(model, annotTypeRepo, reportCreator, annotRepo)
 
 	documentStorage := doc_data_repo_adapter.NewDocumentRepositoryAdapter(DOCUMENTS_PATH, DOCUMENTS_EXT)
 
 	reportStorage := rep_data_repo_adapter.NewDocumentRepositoryAdapter(REPORTS_PATH, REPORTS_EXT)
 
-	documentRepo := document_repo_adapter.NewDocumentRepositoryAdapter(db)
+	documentRepo := document_repo_adapter.NewDocumentRepositoryAdapter(db, documentCache)
 	documentService := document_service.NewDocumentService(documentRepo, documentStorage, reportStorage, reportCreatorService)
 	serv = documentService
 	s, err := gocron.NewScheduler()

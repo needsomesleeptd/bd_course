@@ -27,7 +27,7 @@ FOR EACH ROW EXECUTE PROCEDURE addToQueue();
 
 
 
-CREATE  OR REPLACE FUNCTION getTasksReady(task_status int)
+CREATE  OR REPLACE FUNCTION getTasksReady(task_status SMALLINT)
 RETURNS TABLE (
     id int,
     doc_id uuid,

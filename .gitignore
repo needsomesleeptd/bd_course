@@ -56,3 +56,5 @@ __pycache__
 *.tex
 *.log
 *.pdf
+*.png
+test_utils/*.csv
