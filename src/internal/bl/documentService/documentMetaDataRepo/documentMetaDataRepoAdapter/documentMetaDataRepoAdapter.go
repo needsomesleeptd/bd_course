@@ -109,6 +109,31 @@ func (repo *DocumentMetaDataRepositoryAdapter) GetDocumentCountByCreator(id uint
 	return count, nil
 }
 
+func (repo *DocumentMetaDataRepositoryAdapter) GetDocumentCountByDocumentName(docName string) (int64, error) {
+	var count int64
+	tx := repo.db.Model(models_da.Document{}).Where("document_name = ?", docName).Count(&count)
+
+	if tx.Error != nil {
+		return -1, errors.Wrap(tx.Error, "Error in getting count by creator")
+	}
+	return count, nil
+}
+
+func (repo *DocumentMetaDataRepositoryAdapter) GetDocumentNotChecked() (*models.DocumentMetaData, error) {
+	var documentsDA models_da.Document
+	tx := repo.db.Model(models_da.Document{}).Where("checked_status  = ?", models.NotChecked).First(&documentsDA)
+
+	if tx.Error == gorm.ErrRecordNotFound {
+		return nil, models.ErrNotFound
+	}
+	if tx.Error != nil {
+		return nil, errors.Wrap(tx.Error, "Error in getting document not checked")
+	}
+
+	document := models_da.FromDaDocument(&documentsDA)
+	return &document, nil
+}
+
 func (repo *DocumentMetaDataRepositoryAdapter) UpdateData(id uuid.UUID, data models.DocumentMetaData) error {
 	dataDA := models_da.ToDaDocument(data)
 

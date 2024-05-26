@@ -9,4 +9,5 @@ type IAnotattionRepository interface {
 	GetAnottationsByUserID(id uint64) ([]models.Markup, error)
 	GetAllAnottations() ([]models.Markup, error)
 	UpdateAnotattion(id uint64, markUp *models.Markup) error
+	GetNotCheckedAnotattions(count uint64) ([]models.Markup, error)
 }

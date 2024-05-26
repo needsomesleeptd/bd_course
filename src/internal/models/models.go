@@ -7,12 +7,14 @@ import (
 )
 
 type DocumentMetaData struct {
-	ID           uuid.UUID
-	PageCount    int
-	DocumentName string
-	CreatorID    uint64
-	CreationTime time.Time
-	HasPassed    bool
+	ID            uuid.UUID
+	PageCount     int
+	DocumentName  string
+	CreatorID     uint64
+	CreationTime  time.Time
+	HasPassed     bool
+	ChecksCount   uint64
+	CheckedStatus CheckStatus
 }
 
 type DocumentData struct {
@@ -21,15 +23,15 @@ type DocumentData struct {
 }
 
 type Markup struct {
-	ID         uint64
-	PageData   []byte    //png file -- the page data
-	ErrorBB    []float32 //Bounding boxes in yolov8 format
-	ClassLabel uint64
-	CreatorID  uint64
-	TypeLabel  int
-	WasChecked bool
-	DocumentID uuid.UUID
-	IsValid    bool
+	ID            uint64
+	PageData      []byte    //png file -- the page data
+	ErrorBB       []float32 //Bounding boxes in yolov8 format
+	ClassLabel    uint64
+	CreatorID     uint64
+	TypeLabel     int
+	CheckedStatus CheckStatus
+	DocumentID    uuid.UUID
+	IsValid       bool
 }
 
 type Role int
@@ -38,6 +40,14 @@ const (
 	Sender Role = iota // Role check depends on the order
 	Controller
 	Admin
+)
+
+type CheckStatus int
+
+const (
+	NotChecked CheckStatus = iota
+	IsBeingChecked
+	WasChecked
 )
 
 func (r Role) ToString() string {

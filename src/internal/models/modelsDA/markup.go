@@ -16,15 +16,15 @@ var (
 )
 
 type Markup struct {
-	ID         uint64       `gorm:"primaryKey;column:id"`
-	PageData   []byte       `gorm:"column:page_data"`                                 //png file -- the page data
-	ErrorBB    pgtype.JSONB `gorm:"type:jsonb;default:'[]';not null;column:error_bb"` //because gorm cannot store slices directly(((
-	ClassLabel uint64       `gorm:"column:class_label;foreignKey:MarkupTypeID"`
-	CreatorID  uint64       `gorm:"column:creator_id;foreignKey:UserID"`
-	TypeLabel  int          `gorm:"not null;column:type_label"`
-	WasChecked bool         `gorm:"not null;column:was_checked"`
-	DocumentID uuid.UUID    `gorm:"column:document_id"`
-	IsValid    bool         `gorm:"column:is_valid"`
+	ID            uint64             `gorm:"primaryKey;column:id"`
+	PageData      []byte             `gorm:"column:page_data"`                                 //png file -- the page data
+	ErrorBB       pgtype.JSONB       `gorm:"type:jsonb;default:'[]';not null;column:error_bb"` //because gorm cannot store slices directly(((
+	ClassLabel    uint64             `gorm:"column:class_label;foreignKey:MarkupTypeID"`
+	CreatorID     uint64             `gorm:"column:creator_id;foreignKey:UserID"`
+	TypeLabel     int                `gorm:"not null;column:type_label"`
+	CheckedStatus models.CheckStatus `gorm:"not null;column:checked_status"`
+	DocumentID    uuid.UUID          `gorm:"column:document_id"`
+	IsValid       bool               `gorm:"column:is_valid"`
 }
 
 func FromDaMarkup(markupDa *Markup) (models.Markup, error) {
@@ -49,14 +49,14 @@ func FromDaMarkup(markupDa *Markup) (models.Markup, error) {
 // ToDaMarkup converts a markup Markup to a data access Markup
 func ToDaMarkup(markup models.Markup) (*Markup, error) {
 	markupDa := Markup{
-		ID:         markup.ID,
-		PageData:   markup.PageData,
-		ClassLabel: markup.ClassLabel,
-		CreatorID:  markup.CreatorID,
-		DocumentID: markup.DocumentID,
-		TypeLabel:  markup.TypeLabel,
-		WasChecked: markup.WasChecked,
-		IsValid:    markup.IsValid,
+		ID:            markup.ID,
+		PageData:      markup.PageData,
+		ClassLabel:    markup.ClassLabel,
+		CreatorID:     markup.CreatorID,
+		DocumentID:    markup.DocumentID,
+		TypeLabel:     markup.TypeLabel,
+		CheckedStatus: markup.CheckedStatus,
+		IsValid:       markup.IsValid,
 	}
 	jsonB, err := json.Marshal(markup.ErrorBB)
 	if err != nil {

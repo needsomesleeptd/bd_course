@@ -28,6 +28,7 @@ type IAnotattionService interface {
 	GetAnottationByUserID(user_id uint64) ([]models.Markup, error)
 	GetAllAnottations() ([]models.Markup, error)
 	CheckAnotattion(markup *models.Markup) error
+	GetNotCheckedAnnots(count uint64) ([]models.Markup, error)
 }
 
 type AnotattionService struct {
@@ -108,8 +109,22 @@ func (serv *AnotattionService) GetAllAnottations() ([]models.Markup, error) {
 	return markups, nil
 }
 
+func (serv *AnotattionService) GetNotCheckedAnnots(count uint64) ([]models.Markup, error) {
+	markups, err := serv.repo.GetNotCheckedAnotattions(count)
+	if err != nil {
+		return nil, errors.Wrap(err, "error in getting not checked markups")
+	}
+	for _, markup := range markups {
+		err = serv.repo.UpdateAnotattion(markup.ID, &models.Markup{CheckedStatus: models.IsBeingChecked})
+		if err != nil {
+			return nil, errors.Wrap(err, "error in updateing checked markups")
+		}
+	}
+	return markups, nil
+}
+
 func (serv *AnotattionService) CheckAnotattion(markup *models.Markup) error {
-	markup.WasChecked = true
+	markup.CheckedStatus = models.WasChecked
 	err := serv.repo.UpdateAnotattion(markup.ID, markup)
 	if err != nil {
 		return errors.Wrap(err, "error checking anotattion")

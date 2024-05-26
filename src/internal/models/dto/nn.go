@@ -5,41 +5,41 @@ import (
 )
 
 type Markup struct {
-	ID         uint64    `json:"id"`
-	PageData   []byte    `json:"page_data"`
-	ErrorBB    []float32 `json:"error_bb"`
-	ClassLabel uint64    `json:"class_label"`
-	CreatorID  uint64    `json:"creator_id"`
-	TypeLabel  int       `json:"type_label"`
-	WasChecked bool      `json:"was_checked"`
-	IsValid    bool      `json::"column:is_valid"`
+	ID            uint64             `json:"id"`
+	PageData      []byte             `json:"page_data"`
+	ErrorBB       []float32          `json:"error_bb"`
+	ClassLabel    uint64             `json:"class_label"`
+	CreatorID     uint64             `json:"creator_id"`
+	TypeLabel     int                `json:"type_label"`
+	CheckedStatus models.CheckStatus `json:"checked_status"`
+	IsValid       bool               `json:"is_valid"`
 }
 
 func FromDtoMarkup(markup *Markup) models.Markup {
 
 	return models.Markup{
-		ID:         markup.ID,
-		ClassLabel: markup.ClassLabel,
-		ErrorBB:    markup.ErrorBB,
-		PageData:   markup.PageData,
-		CreatorID:  markup.CreatorID,
-		TypeLabel:  markup.TypeLabel,
-		WasChecked: markup.WasChecked,
-		IsValid:    markup.IsValid,
+		ID:            markup.ID,
+		ClassLabel:    markup.ClassLabel,
+		ErrorBB:       markup.ErrorBB,
+		PageData:      markup.PageData,
+		CreatorID:     markup.CreatorID,
+		TypeLabel:     markup.TypeLabel,
+		CheckedStatus: markup.CheckedStatus,
+		IsValid:       markup.IsValid,
 	}
 
 }
 
 func ToDtoMarkup(markup models.Markup) *Markup {
 	return &Markup{
-		ID:         markup.ID,
-		ClassLabel: markup.ClassLabel,
-		ErrorBB:    markup.ErrorBB,
-		PageData:   markup.PageData,
-		CreatorID:  markup.CreatorID,
-		TypeLabel:  markup.TypeLabel,
-		WasChecked: markup.WasChecked,
-		IsValid:    markup.IsValid,
+		ID:            markup.ID,
+		ClassLabel:    markup.ClassLabel,
+		ErrorBB:       markup.ErrorBB,
+		PageData:      markup.PageData,
+		CreatorID:     markup.CreatorID,
+		TypeLabel:     markup.TypeLabel,
+		CheckedStatus: markup.CheckedStatus,
+		IsValid:       markup.IsValid,
 	}
 }
 

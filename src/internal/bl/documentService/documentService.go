@@ -39,6 +39,8 @@ type IDocumentService interface {
 	CreateReport(ID uuid.UUID) (*models.ErrorReport, error)
 	SaveMetaData(documentMetaData models.DocumentMetaData) error
 	UpdateDocumentData(id uuid.UUID, data models.DocumentMetaData) error
+	GetDocumentCountByDocumentName(docName string) (int64, error)
+	GetDocumentForChecking() (*models.DocumentMetaData, *models.DocumentData, error)
 }
 
 type DocumentService struct {
@@ -159,10 +161,35 @@ func (serv *DocumentService) GetDocumentCountByCreatorID(creatorID uint64) (int6
 	return count, err
 }
 
+func (serv *DocumentService) GetDocumentCountByDocumentName(docName string) (int64, error) {
+	count, err := serv.docMetaRepo.GetDocumentCountByDocumentName(docName)
+	if err != nil {
+		return -1, err
+	}
+	return count, err
+}
+
 func (serv *DocumentService) UpdateDocumentData(id uuid.UUID, data models.DocumentMetaData) error {
 	err := serv.docMetaRepo.UpdateData(id, data)
 	if err != nil {
 		return errors.Wrap(err, "Error updating document data")
 	}
 	return errors.Wrap(err, "Error updating document data")
+}
+
+func (serv *DocumentService) GetDocumentForChecking() (*models.DocumentMetaData, *models.DocumentData, error) {
+	metaData, err := serv.docMetaRepo.GetDocumentNotChecked()
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "Error getting unchecked document metadata")
+	}
+	fileData, err := serv.docRepo.GetDocumentByID(metaData.ID)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "Error getting document by id")
+	}
+	err = serv.UpdateDocumentData(metaData.ID, models.DocumentMetaData{CheckedStatus: models.IsBeingChecked})
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "Error changing doc status to being checked")
+	}
+	return metaData, fileData, nil
+
 }

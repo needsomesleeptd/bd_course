@@ -25,6 +25,10 @@ var (
 )
 
 const (
+	MaxAnnotCheckCount = 2
+)
+
+const (
 	AnnotFileFieldName = "annotFile"
 	JsonBbsFieldName   = "jsonBbs"
 )
@@ -239,5 +243,26 @@ func Check(annotService service.IAnotattionService) http.HandlerFunc {
 			return
 		}
 		render.JSON(w, r, response.OK())
+	}
+}
+
+// @Summary Get's a batch of not checked annots
+// @Description Get's a batch of not checked annots and marks them as is process of checking
+// @Tags Annotation
+// @Security ApiKeyAuth
+// @Accept json
+// @Produce json
+// @Success 200 {object} ResponseGetAnnots
+// @Failure 200 {object} response.Response
+// @Router /annot/getForCheck [get]
+func GetNotCheckedAnnots(annotService service.IAnotattionService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		markups, err := annotService.GetNotCheckedAnnots(MaxAnnotCheckCount)
+		if err != nil {
+			render.JSON(w, r, response.Error(models.GetUserError(err).Error()))
+			return
+		}
+		resp := ResponseGetAnnots{Response: response.OK(), Markups: models_dto.ToDtoMarkupSlice(markups)}
+		render.JSON(w, r, resp)
 	}
 }

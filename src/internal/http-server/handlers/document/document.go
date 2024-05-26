@@ -6,6 +6,8 @@ import (
 	"annotater/internal/middleware/auth_middleware"
 	"annotater/internal/models"
 	pdf_utils "annotater/internal/pkg/pdfUtils"
+	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -207,17 +209,15 @@ func (h *Documenthandler) GetDocumentsMetaData() http.HandlerFunc {
 	}
 }
 
-// @Summary Create an error report by given document
-// @Description Gets a document, saves it with metadata on the system, then creates a report,
-// saves it in the system and gives it back to the sender
+// @Summary Gets an unchecked file and marks it as being checked
+// @Description Gets a document and it's metaData and returns it to the user, inly available for controllers and admin
 // @Security ApiKeyAuth
 // @Tags Document
 // @Accept mpfd
 // @Produce application/pdf,json
-// @Param file formData file true "Document file to report"   // Form parameter 'file' for sending the document
 // @Success 200 {object} []byte
 // @Failure 200 {object} response.Response
-// @Router /document/report [post]
+// @Router /document/getDocumentForCheck [get]
 func (h *Documenthandler) CreateReport() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := r.Context().Value(auth_middleware.UserIDContextKey).(uint64)
@@ -244,19 +244,25 @@ func (h *Documenthandler) CreateReport() http.HandlerFunc {
 		}
 
 		var pagesCount int
+		var checksCount int64
 		pagesCount, err = pdf_utils.GetPdfPageCount(fileBytes)
-
 		if err != nil {
 			h.logger.Error(errors.Join(err, ErrGettingPageCount).Error())
 			pagesCount = -1
 		}
 
+		checksCount, err = h.docService.GetDocumentCountByDocumentName(handler.Filename)
+		if err != nil {
+			h.logger.Error(errors.Join(err, ErrGettingPageCount).Error())
+			checksCount = -1
+		}
 		documentMetaData := models.DocumentMetaData{
 			ID:           uuid.New(),
 			CreatorID:    userID,
 			DocumentName: handler.Filename,
 			CreationTime: time.Now(),
 			PageCount:    pagesCount,
+			ChecksCount:  uint64(checksCount),
 		}
 		documentData := models.DocumentData{
 			DocumentBytes: fileBytes,
@@ -284,7 +290,7 @@ func (h *Documenthandler) CreateReport() http.HandlerFunc {
 }
 
 // @Summary Mark a document to pass by normocontroller (requires a role to be a normocontroller)
-// @Description Set's a field of the document has passed to true
+// @Description Set's a field of the document has passed to true and marks it as checked
 // @Security ApiKeyAuth
 // @Tags Document
 // @Accept json
@@ -299,11 +305,10 @@ func (h *Documenthandler) MakeDecisionPassed() http.HandlerFunc {
 
 		err := render.DecodeJSON(r.Body, &req)
 		if err != nil {
-			render.JSON(w, r, response.Error(models.ErrDecodingRequest.Error())) //TODO:: add logging here
-			h.logger.Error(err.Error())
+			render.JSON(w, r, response.Error(models.ErrDecodingRequest.Error()))
 			return
 		}
-		document := models.DocumentMetaData{HasPassed: req.HasPassed}
+		document := models.DocumentMetaData{HasPassed: req.HasPassed, CheckedStatus: models.WasChecked}
 		err = h.docService.UpdateDocumentData(req.ID, document)
 		if err != nil {
 			render.JSON(w, r, response.Error(models.GetUserError(err).Error()))
@@ -311,6 +316,70 @@ func (h *Documenthandler) MakeDecisionPassed() http.HandlerFunc {
 			return
 		}
 		render.JSON(w, r, response.OK())
+	}
+}
+
+// @Summary Create an error report by given document
+// @Description Gets a document, saves it with metadata on the system, then creates a report,
+// saves it in the system and gives it back to the sender
+// @Security ApiKeyAuth
+// @Tags Document
+// @Accept multipart/form-data
+// @Produce application/pdf,json
+// @Success 200 {object} []byte
+// @Failure 200 {object} response.Response
+// @Router /document/report [post]
+func (h *Documenthandler) GetDocumentForCheck() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		docMeta, doc, err := h.docService.GetDocumentForChecking()
+		if err != nil {
+			render.JSON(w, r, response.Error(ErrGettingFile.Error()))
+			h.logger.Error(err.Error())
+			return
+		}
+		docMetaMarshalled, err := json.Marshal(docMeta)
+		if err != nil {
+			render.JSON(w, r, response.Error("error marshalling  docMetaData"))
+			h.logger.Error(err.Error())
+			return
+		}
+		var requestBody bytes.Buffer
+		mpWriter := multipart.NewWriter(&requestBody)
+
+		jsonPart, err := mpWriter.CreateFormField("metadata")
+		if err != nil {
+			render.JSON(w, r, response.Error("error creating formField"))
+			h.logger.Error(err.Error())
+			return
+		}
+		_, err = jsonPart.Write(docMetaMarshalled)
+		if err != nil {
+			render.JSON(w, r, response.Error("error writing marshlled data"))
+			h.logger.Error(err.Error())
+			return
+		}
+		filePart, err := mpWriter.CreateFormFile("file", docMeta.DocumentName)
+		if err != nil {
+			render.JSON(w, r, response.Error("error getting filePart"))
+			h.logger.Error(err.Error())
+		}
+
+		// Assuming fileData contains the file data in memory
+		_, err = filePart.Write(doc.DocumentBytes)
+		if err != nil {
+			render.JSON(w, r, response.Error("error getting filePart"))
+			h.logger.Error(err.Error())
+		}
+		mpWriter.Close()
+		w.Header().Set("Content-Type", mpWriter.FormDataContentType())
+		w.WriteHeader(http.StatusOK)
+
+		_, err = w.Write(requestBody.Bytes())
+		if err != nil {
+			render.JSON(w, r, response.Error("error sending response"))
+			h.logger.Error(err.Error())
+		}
+
 	}
 }
 
@@ -405,19 +474,25 @@ func (h *Documenthandler) SaveDocument() http.HandlerFunc {
 		}
 
 		var pagesCount int
+		var checksCount int64
 		pagesCount, err = pdf_utils.GetPdfPageCount(fileBytes)
-
 		if err != nil {
 			h.logger.Error(errors.Join(err, ErrGettingPageCount).Error())
 			pagesCount = -1
 		}
 
+		checksCount, err = h.docService.GetDocumentCountByDocumentName(handler.Filename)
+		if err != nil {
+			h.logger.Error(errors.Join(err, ErrGettingPageCount).Error())
+			checksCount = -1
+		}
 		documentMetaData := models.DocumentMetaData{
 			ID:           uuid.New(),
 			CreatorID:    userID,
 			DocumentName: handler.Filename,
 			CreationTime: time.Now(),
 			PageCount:    pagesCount,
+			ChecksCount:  uint64(checksCount),
 		}
 
 		err = h.docService.SaveMetaData(documentMetaData)

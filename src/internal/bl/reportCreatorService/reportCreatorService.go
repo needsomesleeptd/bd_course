@@ -71,7 +71,7 @@ func (serv *ReportCreatorService) CreateReport(document models.DocumentData, use
 	mainErr := errors.New("error in adding anotattions")
 	for _, markup := range markups {
 		markup.CreatorID = userID
-		markup.WasChecked = false
+		markup.CheckedStatus = models.NotChecked
 		markup.DocumentID = document.ID
 		markup.IsValid = false
 		err := serv.annotRepo.AddAnottation(&markup)

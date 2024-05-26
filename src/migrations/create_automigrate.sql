@@ -5,7 +5,8 @@ CREATE TABLE IF NOT EXISTS documents (
     checks_count INT NOT NULL,
     creator_id BIGINT NOT NULL,
     creation_time TIMESTAMP NOT NULL,
-    has_passed BOOL NOT NULL
+    has_passed BOOL NOT NULL,
+    checked_status INT NOT NULL,
 );
 
 CREATE TABLE IF NOT EXISTS markup_types (
@@ -32,7 +33,7 @@ CREATE TABLE IF NOT EXISTS markups (
     class_label BIGINT NOT NULL,
     creator_id BIGINT NOT NULL,
     type_label INT NOT NULL,
-    was_checked BOOL NOT NULL,
+    checked_status INT NOT NULL,
     document_id UUID NOT NULL,
     is_valid BOOL NOT NULL
 );

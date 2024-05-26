@@ -108,7 +108,6 @@ func setuplog() *slog.Logger {
 func main() {
 	db, err := gorm.Open(postgres.New(POSTGRES_CFG), &gorm.Config{TranslateError: true})
 	log := setuplog()
-
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
@@ -210,6 +209,7 @@ func main() {
 			r.Post("/getReport", documentHandler.GetReportByID())
 			r.Get("/getDocumentsMeta", documentHandler.GetDocumentsMetaData())
 			r.Post("/makeDecision", documentHandler.MakeDecisionPassed())
+			r.Get("/getDocumentForCheck", documentHandler.GetDocumentForCheck())
 		})
 
 		// AnnotType
@@ -234,7 +234,7 @@ func main() {
 			r.Use(accesMiddleware.ControllersAndHigherMiddleware)
 			//adminOnlyAnnots := r.Group(nil)
 			//adminOnlyAnnots.Use(accesMiddleware.AdminOnlyMiddleware)
-
+			r.Get("/getForCheck", annot_handler.GetNotCheckedAnnots(annotService))
 			r.Post("/add", annot_handler.AddAnnot(annotService))
 			r.Post("/get", annot_handler.GetAnnot(annotService))
 			r.Get("/creatorID", annot_handler.GetAnnotsByUserID(annotService))

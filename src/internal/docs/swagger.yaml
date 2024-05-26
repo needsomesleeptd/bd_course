@@ -22,6 +22,8 @@ definitions:
     type: object
   annot_handler.ResponseGetAnnot:
     properties:
+      checked_status:
+        $ref: '#/definitions/models.CheckStatus'
       class_label:
         type: integer
       creator_id:
@@ -34,7 +36,7 @@ definitions:
         type: array
       id:
         type: integer
-      isValid:
+      is_valid:
         type: boolean
       page_data:
         items:
@@ -44,8 +46,6 @@ definitions:
         type: string
       type_label:
         type: integer
-      was_checked:
-        type: boolean
     type: object
   annot_handler.ResponseGetAnnots:
     properties:
@@ -145,8 +145,22 @@ definitions:
       response:
         $ref: '#/definitions/response.Response'
     type: object
+  models.CheckStatus:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - NotChecked
+    - IsBeingChecked
+    - WasChecked
   models.DocumentMetaData:
     properties:
+      checkedStatus:
+        $ref: '#/definitions/models.CheckStatus'
+      checksCount:
+        type: integer
       creationTime:
         type: string
       creatorID:
@@ -174,6 +188,8 @@ definitions:
     - Admin
   models_dto.Markup:
     properties:
+      checked_status:
+        $ref: '#/definitions/models.CheckStatus'
       class_label:
         type: integer
       creator_id:
@@ -184,7 +200,7 @@ definitions:
         type: array
       id:
         type: integer
-      isValid:
+      is_valid:
         type: boolean
       page_data:
         items:
@@ -192,8 +208,6 @@ definitions:
         type: array
       type_label:
         type: integer
-      was_checked:
-        type: boolean
     type: object
   models_dto.MarkupType:
     properties:
@@ -367,6 +381,24 @@ paths:
       summary: Get a specific annotation
       tags:
       - Annotation
+  /annot/getForCheck:
+    get:
+      consumes:
+      - application/json
+      description: Get's a batch of not checked annots and marks them as is process
+        of checking
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get's a batch of not checked annots
+      tags:
+      - Annotation
   /annot/getsAll:
     get:
       consumes:
@@ -517,6 +549,25 @@ paths:
       summary: Get document by ID
       tags:
       - Document
+  /document/getDocumentForCheck:
+    get:
+      consumes:
+      - multipart/form-data
+      description: Gets a document and it's metaData and returns it to the user, inly
+        available for controllers and admin
+      produces:
+      - application/pdf
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Gets an unchecked file and marks it as being checked
+      tags:
+      - Document
   /document/getDocumentsMeta:
     get:
       consumes:
@@ -563,7 +614,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: Set's a field of the document has passed to true
+      description: Set's a field of the document has passed to true and marks it as
+        checked
       parameters:
       - description: id and bool value of whether the lab was merged
         in: body
@@ -590,12 +642,6 @@ paths:
       - multipart/form-data
       description: Gets a document, saves it with metadata on the system, then creates
         a report,
-      parameters:
-      - description: Document file to report
-        in: formData
-        name: file
-        required: true
-        type: file
       produces:
       - application/pdf
       - application/json

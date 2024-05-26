@@ -187,6 +187,34 @@ const docTemplate = `{
                 }
             }
         },
+        "/annot/getForCheck": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get's a batch of not checked annots and marks them as is process of checking",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Annotation"
+                ],
+                "summary": "Get's a batch of not checked annots",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/annot/getsAll": {
             "get": {
                 "security": [
@@ -428,6 +456,35 @@ const docTemplate = `{
                 }
             }
         },
+        "/document/getDocumentForCheck": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Gets a document and it's metaData and returns it to the user, inly available for controllers and admin",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/pdf",
+                    "application/json"
+                ],
+                "tags": [
+                    "Document"
+                ],
+                "summary": "Gets an unchecked file and marks it as being checked",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/document/getDocumentsMeta": {
             "get": {
                 "security": [
@@ -503,7 +560,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Set's a field of the document has passed to true",
+                "description": "Set's a field of the document has passed to true and marks it as checked",
                 "consumes": [
                     "application/json"
                 ],
@@ -554,15 +611,6 @@ const docTemplate = `{
                     "Document"
                 ],
                 "summary": "Create an error report by given document",
-                "parameters": [
-                    {
-                        "type": "file",
-                        "description": "Document file to report",
-                        "name": "file",
-                        "in": "formData",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -744,6 +792,9 @@ const docTemplate = `{
         "annot_handler.ResponseGetAnnot": {
             "type": "object",
             "properties": {
+                "checked_status": {
+                    "$ref": "#/definitions/models.CheckStatus"
+                },
                 "class_label": {
                     "type": "integer"
                 },
@@ -762,7 +813,7 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "isValid": {
+                "is_valid": {
                     "type": "boolean"
                 },
                 "page_data": {
@@ -776,9 +827,6 @@ const docTemplate = `{
                 },
                 "type_label": {
                     "type": "integer"
-                },
-                "was_checked": {
-                    "type": "boolean"
                 }
             }
         },
@@ -935,9 +983,28 @@ const docTemplate = `{
                 }
             }
         },
+        "models.CheckStatus": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2
+            ],
+            "x-enum-varnames": [
+                "NotChecked",
+                "IsBeingChecked",
+                "WasChecked"
+            ]
+        },
         "models.DocumentMetaData": {
             "type": "object",
             "properties": {
+                "checkedStatus": {
+                    "$ref": "#/definitions/models.CheckStatus"
+                },
+                "checksCount": {
+                    "type": "integer"
+                },
                 "creationTime": {
                     "type": "string"
                 },
@@ -977,6 +1044,9 @@ const docTemplate = `{
         "models_dto.Markup": {
             "type": "object",
             "properties": {
+                "checked_status": {
+                    "$ref": "#/definitions/models.CheckStatus"
+                },
                 "class_label": {
                     "type": "integer"
                 },
@@ -992,7 +1062,7 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "isValid": {
+                "is_valid": {
                     "type": "boolean"
                 },
                 "page_data": {
@@ -1003,9 +1073,6 @@ const docTemplate = `{
                 },
                 "type_label": {
                     "type": "integer"
-                },
-                "was_checked": {
-                    "type": "boolean"
                 }
             }
         },

@@ -142,3 +142,21 @@ func (repo *AnotattionRepositoryAdapter) UpdateAnotattion(id uint64, markUp *mod
 	}
 	return nil
 }
+func (repo *AnotattionRepositoryAdapter) GetNotCheckedAnotattions(count uint64) ([]models.Markup, error) {
+	var markUpsDA []models_da.Markup
+	tx := repo.db.Where("checked_status = ?", models.NotChecked).
+		Limit(int(count)).
+		Find(&markUpsDA)
+
+	if tx.Error == gorm.ErrRecordNotFound {
+		return nil, models.ErrNotFound
+	}
+	if tx.Error != nil {
+		return nil, errors.Wrap(tx.Error, "Error in getting no checked anotattions")
+	}
+	markUps, err := models_da.FromDaMarkupSlice(markUpsDA)
+	if err != nil {
+		return nil, errors.Wrap(err, "Error from da in getting not checked annots")
+	}
+	return markUps, nil
+}
