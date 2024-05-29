@@ -1,32 +1,39 @@
 #pas23um188 
 
+from detection_scripts.formulas.formulas_err_detector import  FormulasErrorDetector,convert_pil_to_cv2_img
+
 from pathlib import Path
 import os
 
 # Import OpenCV module 
+import PIL.Image
 import cv2
 # Import pyplot from matplotlib as pltd 
 from matplotlib import pyplot as pltd
+import PIL
 
-path = Path(os.getcwd())
-formulas_dir = path 
-pictures_names = [name for name in os.listdir(formulas_dir) if str(name).endswith('.png')]
+import random
 
-def handle_image(current_dir: Path, image_name: str, debug_value: bool = False):
-    if 'marked_image' not in os.listdir(current_dir):
-        os.mkdir(current_dir / 'marked_image')
+
+FORMULAS_POSITION_ERR_CLASS = 151
+
+
+current_dir = "./checks" # for debugging 
+image_name = random.randint(1,100)
+
+def handle_image(pil_imging : PIL.Image, debug_value: bool = False):
+    cv2_image = convert_pil_to_cv2_img(pil_imging)
     # Opening the image from files 
-    imaging = cv2.imread(str(current_dir / image_name))
     # Altering properties of image with cv2 
-    img_gray = cv2.cvtColor(imaging, cv2.COLOR_BGR2GRAY)
-    imaging_rgb = cv2.cvtColor(imaging, cv2.COLOR_BGR2RGB)
+    img_gray = cv2.cvtColor(cv2_image, cv2.COLOR_BGR2GRAY)
+    imaging_rgb = cv2.cvtColor(cv2_image, cv2.COLOR_BGR2RGB)
     if debug_value:
         # Plotting image with subplot() from plt 
         pltd.subplot(1, 1, 1)
         # Displaying image in the output 
         pltd.imshow(imaging_rgb)
         pltd.show()
-    gray = cv2.cvtColor(imaging, cv2.COLOR_BGR2GRAY)
+    gray = cv2.cvtColor(cv2_image, cv2.COLOR_BGR2GRAY)
     ret, thresh1 = cv2.threshold(gray, 0, 255, cv2.THRESH_OTSU |
                                  cv2.THRESH_BINARY_INV)
     if debug_value:
@@ -38,7 +45,7 @@ def handle_image(current_dir: Path, image_name: str, debug_value: bool = False):
     contours, hierarchy = cv2.findContours(
         dilation, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     
-    im2 = imaging.copy()
+    im2 = cv2_image.copy()
     # cv2.imwrite('test.jpg',cv2.rectangle(im2, (x, y), (x + w, y + h), (0, 255, 0), 2))
     centering_flag = False
     for cnt in contours:
@@ -99,12 +106,24 @@ def handle_image(current_dir: Path, image_name: str, debug_value: bool = False):
         rect=cv2.rectangle(im2, (x, y), (x + w, y + h), (0, 255, 0), 2)
         if debug_value:
             cv2.imwrite(str(current_dir / 'marked_image' / image_name), rect)
-        # Рисуем ограничительную рамку на текстовой области
-        # rect=cv2.rectangle(im2, (x, y), (x + w, y + h), (0, 255, 0), 2)    
-        # cv2.imwrite(str(current_dir / 'marked_image' / image_name), rect)
-    if centering_flag:
-        print(f'Formula\'s centering "{image_name}" is correct')
-    else:
-        print(f'Formula\'s centering "{image_name}" is incorrect')
-    return centering_flag
-handle_image(formulas_dir, image_name="image.png", debug_value=True)
+     
+
+    return centering_flag,im2
+
+
+class CheckingFormulasPositions(FormulasErrorDetector):
+    def __init__(self):
+        self.detected_image = None
+  
+    def detect_error(self, image: any) -> bool:
+        res,img = handle_image(image)
+        self.detected_image = img
+        return not res
+        
+  
+    def get_err_class(self) -> int:
+        return FORMULAS_POSITION_ERR_CLASS
+
+   
+    def get_detected_image(self):
+        return self.detected_image

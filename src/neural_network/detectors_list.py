@@ -8,6 +8,10 @@ from detection_scripts.tables.table_err_detector import *
 from detection_scripts.graphs.find_legend import * 
 from detection_scripts.graphs.find_wrong_subs import *
 
+from detection_scripts.formulas.checking_number_pos import * 
+from detection_scripts.formulas.checking_number import * 
+from detection_scripts.formulas.checking_syntax import * 
+
 def create_schemes_detectors():
     arr_detector = ArrowsDestinationErrDetector()
     if_detector = IfSubscriptionErrDetector()
@@ -23,8 +27,13 @@ def create_graphs_detectors():
     subs_detector = AxisSubsErrorDetector()
     return [legend_detector,subs_detector]
 
+def create_formulas_detectors():
+    check_numer_pos = CheckingFormulasPositions()
+    check_number_subs = CheckingFormulasSyntax()
+    check_number_syntax = CheckingFormulasSyntax()
+    return [check_number_subs,check_numer_pos,check_number_syntax]
 def create_all_detectors():
-    return create_schemes_detectors() + create_tables_detectors() + create_graphs_detectors()
+    return create_schemes_detectors() + create_tables_detectors() + create_graphs_detectors() + create_formulas_detectors()
 
 
 

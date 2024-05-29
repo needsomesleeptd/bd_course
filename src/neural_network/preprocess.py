@@ -43,7 +43,6 @@ def get_anotattions(png_page:Image,byte_page:bytes, model,detectors : list[Error
         clses = predict.boxes.cls.tolist()
       
         for i in range(len(bboxes)):
-            error_cls = NO_ERR_ERR_CLASS
             for detector in detectors:
                 error_cls = NO_ERR_ERR_CLASS
                 cls = int(clses[i])
@@ -51,7 +50,7 @@ def get_anotattions(png_page:Image,byte_page:bytes, model,detectors : list[Error
                 if detector.get_detection_class() == cls:
                     has_err = detector.detect_error(png_page)
                     if has_err:
-                        
+                        print(f"detected error for class {cls},{error_cls}")
                         error_cls = detector.get_err_class()
                         # cv2_img = detector.get_detected_image()
                         # if isinstance(cv2_img, Image.Image):

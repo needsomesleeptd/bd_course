@@ -2,10 +2,17 @@ import cv2
 import pytesseract
 import sys
 import re
+from detection_scripts.formulas.formulas_err_detector import  FormulasErrorDetector,convert_pil_to_cv2_img
 
-def main(image_path):
+FORMULAS_POSITION_ERR_NUMERATION = 152
+
+
+pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
+
+def check_formulas_subscription(pil_image):
     # image_path = 'formulas/pos09.png'
-    image = cv2.imread(image_path)
+    #image = cv2.imread(image_path)\
+    image = convert_pil_to_cv2_img(pil_image)
 
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     _, threshold = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
@@ -32,12 +39,25 @@ def main(image_path):
 
     if numbered:
         print("Ошибок нет")
-        return True
+        return True,image
     else:
         print("Ошибка: отсутствует нумерация")
-        return False
+        return False,image
 
+class CheckingFormulasSubscription(FormulasErrorDetector):
+    def __init__(self):
+        self.detected_image = None
+  
+    def detect_error(self, image: any) -> bool:
+        res,img = check_formulas_subscription(image)
+        self.detected_image = img
+        return not res
+        
+  
+    def get_err_class(self) -> int:
+        return FORMULAS_POSITION_ERR_NUMERATION
 
-if __name__ == "__main__":
-    pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
-    main(sys.argv[1])
+   
+    def get_detected_image(self):
+        return self.detected_image
+
