@@ -10,6 +10,8 @@ CONNECTION LIMIT -1
  LOGIN
  PASSWORD 'admin';
 
+GRANT USAGE  on SCHEMA public to admin;
+
 GRANT ALL PRIVILEGES
 ON ALL TABLES IN SCHEMA public TO admin;
 
@@ -24,6 +26,8 @@ NOBYPASSRLS
 CONNECTION LIMIT -1
  LOGIN
  PASSWORD 'adder';
+
+GRANT USAGE  on SCHEMA public to adder;
 
 GRANT INSERT
 ON public.users 
@@ -41,6 +45,8 @@ NOBYPASSRLS
 CONNECTION LIMIT -1
  LOGIN
  PASSWORD 'annoter';
+
+GRANT USAGE  on SCHEMA public to annoter;
 
 GRANT INSERT
 ON public.markups TO annoter;
@@ -65,7 +71,7 @@ CONNECTION LIMIT -1
  PASSWORD 'student';
 
 
-
+GRANT USAGE  on SCHEMA public to student;
 
 GRANT INSERT
 ON public.comments 
@@ -89,12 +95,19 @@ CONNECTION LIMIT -1
  LOGIN
  PASSWORD 'controller';
 
+GRANT USAGE  on SCHEMA public to controller;
 
 GRANT  ALL PRIVILEGES
 ON public.comments 
 TO controller;
 
-GRANT annoter TO controller;
+GRANT INSERT,SELECT
+ON public.markups TO controller;
+
+GRANT SELECT
+ON public.documents 
+TO controller;
+
 
 GRANT INSERT,SELECT
 ON public.markup_types 
@@ -115,6 +128,8 @@ NOBYPASSRLS
 CONNECTION LIMIT -1
  LOGIN
  PASSWORD 'queue_worker';
+
+GRANT USAGE  on SCHEMA public to queue_worker;
 
 GRANT SELECT,UPDATE
 ON public.document_queues

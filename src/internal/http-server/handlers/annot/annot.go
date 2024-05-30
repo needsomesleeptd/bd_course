@@ -13,6 +13,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/render"
+	"github.com/google/uuid"
 )
 
 var (
@@ -96,11 +97,16 @@ func AddAnnot(annotService service.IAnotattionService) http.HandlerFunc {
 			fmt.Print(err.Error())
 			return
 		}
+		uuid_new, _ := uuid.Parse("00000000-0000-0000-0000-000000000000")
 		annot := models.Markup{
-			PageData:   pageData,
-			ErrorBB:    req.ErrorBB,
-			ClassLabel: req.ClassLabel,
-			CreatorID:  userID,
+			PageData:      pageData,
+			ErrorBB:       req.ErrorBB,
+			ClassLabel:    req.ClassLabel,
+			TypeLabel:     int(req.ClassLabel) % 100,
+			CreatorID:     userID,
+			DocumentID:    uuid_new,
+			IsValid:       false,
+			CheckedStatus: models.NotChecked,
 		}
 		err = annotService.AddAnottation(&annot)
 		if err != nil {

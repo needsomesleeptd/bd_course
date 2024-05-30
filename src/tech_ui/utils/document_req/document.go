@@ -149,7 +149,7 @@ func GetDocument(client *http.Client, documentPath string, jwtToken string, id u
 		return err
 	}
 	var req *http.Request
-	req, err = http.NewRequest("GET", url, bytes.NewReader(marhsalledBody))
+	req, err = http.NewRequest("POST", url, bytes.NewReader(marhsalledBody))
 	if err != nil {
 		return err
 	}
@@ -197,7 +197,7 @@ func GetReport(client *http.Client, documentPath string, jwtToken string, id uui
 		return err
 	}
 	var req *http.Request
-	req, err = http.NewRequest("GET", url, bytes.NewReader(marhsalledBody))
+	req, err = http.NewRequest("POST", url, bytes.NewReader(marhsalledBody))
 	if err != nil {
 		return err
 	}

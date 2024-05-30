@@ -61,6 +61,7 @@ func (serv *AuthService) SignUp(candidate *models.User) error {
 	}
 	candidateHashedPasswd := *candidate
 	candidateHashedPasswd.Password = passHash
+	candidateHashedPasswd.Role = models.Sender
 
 	err = serv.userRepo.CreateUser(&candidateHashedPasswd)
 	if err != nil {

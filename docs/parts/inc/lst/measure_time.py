@@ -5,9 +5,15 @@ import threading
 import random
 
 headers = {
-    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MywiUm9sZSI6MiwiZXhwcmlyZXMiOiIyMDI0LTA1LTIwVDExOjE2OjU3LjkyMzE0ODk5NSswMzowMCIsImxvZ2luIjoiYWRtaW4ifQ.kLhEqSSF8yK8GkCjtG7OixtgpDg8dicmM3F9Jk680B0',
+    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6Ik\
+    pXVCJ9.eyJJRCI6MywiUm9sZSI6MiwiZXhwcmlyZXMiOiIyMDI0LTA1L\
+    TIwVDExOjE2OjU3LjkyMzE0ODk5NSswMzowMCIsImxvZ2luIjoiYWRtaW4if\
+    Q.kLhEqSSF8yK8GkCjtG7OixtgpDg8dicmM3F9Jk680B0',
     'Content-Type': 'application/json',
-    'Cookie': 'auth_jwt="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MywiUm9sZSI6MiwiZXhwcmlyZXMiOiIyMDI0LTA1LTIwVDExOjE2OjU3LjkyMzE0ODk5NSswMzowMCIsImxvZ2luIjoiYWRtaW4ifQ.kLhEqSSF8yK8GkCjtG7OixtgpDg8dicmM3F9Jk680B0"'
+    'Cookie': 'auth_jwt="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.\
+    eyJJRCI6MywiUm9sZSI6MiwiZXhwcmlyZXMiOiIyMDI0LTA1LTIwVDExOjE2O\
+    jU3LjkyMzE0ODk5NSswMzowMCIsImxvZ2luIjoiYWRtaW4ifQ.kLhEqSSF8yK8\
+    GkCjtG7OixtgpDg8dicmM3F9Jk680B0"'
 }
 
 urlTest = 'http://localhost:8080/annot/get'
