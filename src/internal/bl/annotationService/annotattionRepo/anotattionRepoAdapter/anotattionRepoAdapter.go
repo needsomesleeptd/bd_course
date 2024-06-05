@@ -133,6 +133,11 @@ func (repo *AnotattionRepositoryAdapter) UpdateAnotattion(id uint64, markUp *mod
 	if tx.Error == gorm.ErrRecordNotFound {
 		return models.ErrNotFound
 	}
+
+	if tx.Error == gorm.ErrForeignKeyViolated {
+		return models.ErrViolatingKeyAnnot
+	}
+
 	if tx.Error != nil {
 		return errors.Wrap(tx.Error, "Error in updating anotattion")
 	}
