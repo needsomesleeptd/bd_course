@@ -49,3 +49,12 @@ go.work
 *.aux
 *Zone.Identifier
 .idea
+__pycache__
+__pycache__
+
+*.png
+*.tex
+*.log
+*.pdf
+*.png
+test_utils/*.csv

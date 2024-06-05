@@ -1,0 +1,110 @@
+--Создание админа
+CREATE ROLE admin WITH
+SUPERUSER
+NOCREATEDB
+CREATEROLE
+NOINHERIT
+NOREPLICATION
+NOBYPASSRLS
+CONNECTION LIMIT -1
+ LOGIN
+ PASSWORD 'admin';
+
+GRANT ALL PRIVILEGES
+ON ALL TABLES IN SCHEMA public TO admin;
+
+--Создание добавляющего
+CREATE ROLE adder WITH
+NOSUPERUSER
+NOCREATEDB
+NOCREATEROLE
+NOINHERIT
+NOREPLICATION
+NOBYPASSRLS
+CONNECTION LIMIT -1
+ LOGIN
+ PASSWORD 'adder';
+
+GRANT INSERT
+ON public.users 
+TO adder;
+
+
+--Создание разметчика
+CREATE ROLE annoter WITH
+NOSUPERUSER
+NOCREATEDB
+NOCREATEROLE
+NOINHERIT
+NOREPLICATION
+NOBYPASSRLS
+CONNECTION LIMIT -1
+ LOGIN
+ PASSWORD 'annoter';
+
+GRANT INSERT
+ON public.markups TO annoter;
+
+GRANT SELECT
+ON public.documents 
+TO annoter;
+
+
+
+
+--Создание пользователя (студента)
+CREATE ROLE student WITH
+NOSUPERUSER
+NOCREATEDB
+NOCREATEROLE
+NOINHERIT
+NOREPLICATION
+NOBYPASSRLS
+CONNECTION LIMIT -1
+ LOGIN
+ PASSWORD 'student';
+
+
+
+
+GRANT INSERT
+ON public.comments 
+TO student;
+
+GRANT INSERT,SELECT
+ON public.markups 
+TO student;
+-- think about adding function for viewing all his documents and reports
+
+
+--Создание нормоконтроллера
+CREATE ROLE controller WITH
+NOSUPERUSER
+NOCREATEDB
+NOCREATEROLE
+NOINHERIT
+NOREPLICATION
+NOBYPASSRLS
+CONNECTION LIMIT -1
+ LOGIN
+ PASSWORD 'controller';
+
+
+
+
+GRANT  ALL PRIVILEGES
+ON public.comments 
+TO controller;
+
+GRANT SELECT
+ON public.markups 
+TO controller;
+
+
+GRANT INSERT,SELECT
+ON public.markup_types 
+TO controller;
+
+GRANT ALL PRIVILEGES
+ON public.achievment 
+TO controller;
