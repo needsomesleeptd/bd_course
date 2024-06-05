@@ -43,6 +43,9 @@ func NewAnnotattionService(pRep repository.IAnotattionRepository) IAnotattionSer
 }
 
 func AreBBsValid(slice []float32) bool { //TODO:: think if i want to export everything
+	if len(slice) != 4 {
+		return false
+	}
 	for _, value := range slice {
 		if value < 0.0 || value > 1.0 {
 			return false
@@ -124,7 +127,11 @@ func (serv *AnotattionService) GetNotCheckedAnnots(count uint64) ([]models.Marku
 }
 
 func (serv *AnotattionService) CheckAnotattion(markup *models.Markup) error {
+	if !AreBBsValid(markup.ErrorBB) {
+		return ErrBoundingBoxes
+	}
 	markup.CheckedStatus = models.WasChecked
+
 	err := serv.repo.UpdateAnotattion(markup.ID, markup)
 	if err != nil {
 		return errors.Wrap(err, "error checking anotattion")

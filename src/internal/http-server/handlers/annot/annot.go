@@ -236,16 +236,17 @@ func Check(annotService service.IAnotattionService) http.HandlerFunc {
 			return
 		}
 		markup := models.Markup{
-			ID:         req.ID,
-			ClassLabel: req.ClassLabel,
-			TypeLabel:  req.TypeLabel,
-			ErrorBB:    req.ErrorBB,
-			CreatorID:  userID,
-			IsValid:    req.IsValid,
+			ID:            req.ID,
+			ClassLabel:    req.ClassLabel,
+			TypeLabel:     req.TypeLabel,
+			ErrorBB:       req.ErrorBB,
+			CreatorID:     userID,
+			IsValid:       req.IsValid,
+			CheckedStatus: models.WasChecked,
 		}
 		err = annotService.CheckAnotattion(&markup)
 		if err != nil {
-			render.JSON(w, r, response.Error(models.GetUserError(err).Error()))
+			render.JSON(w, r, response.Error(err.Error()))
 			return
 		}
 		render.JSON(w, r, response.OK())

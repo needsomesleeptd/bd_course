@@ -29,12 +29,14 @@ type Markup struct {
 
 func FromDaMarkup(markupDa *Markup) (models.Markup, error) {
 	markup := models.Markup{
-		ID:         markupDa.ID,
-		PageData:   markupDa.PageData,
-		ClassLabel: markupDa.ClassLabel,
-		CreatorID:  markupDa.CreatorID,
-		DocumentID: markupDa.DocumentID,
-		IsValid:    markupDa.IsValid,
+		ID:            markupDa.ID,
+		PageData:      markupDa.PageData,
+		ClassLabel:    markupDa.ClassLabel,
+		CreatorID:     markupDa.CreatorID,
+		DocumentID:    markupDa.DocumentID,
+		IsValid:       markupDa.IsValid,
+		TypeLabel:     markupDa.TypeLabel,
+		CheckedStatus: markupDa.CheckedStatus,
 	}
 	var errorBBsJson []float32
 	err := json.Unmarshal(markupDa.ErrorBB.Bytes, &errorBBsJson)
