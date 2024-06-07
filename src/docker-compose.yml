@@ -86,15 +86,7 @@ services:
          cpus: '0.5'
          memory: 1G
 
- python-flask-app:
-   build:
-     context: ./neural_network
-   ports:
-     - "5000:5000"
-   container_name: python-flask-app
-   depends_on:
-     - postgres
-   restart: always
+
 
 volumes:
  pgadmin-data:
